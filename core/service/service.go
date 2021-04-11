@@ -39,7 +39,7 @@ func appEnvVarsToMap(appEnvVars []models.ApplicationEnvVar) map[string]string {
 	return env
 }
 
-func (s *Service) ApplyEnvironmentDeployment(ctx context.Context, environment *models.Environment) error {
+func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment) error {
 	var apps []models.Application
 	s.linker.RepositoryDecoder("Application").Find(ctx, &filter.Filter{
 		Where: &map[string]interface{}{
@@ -49,10 +49,15 @@ func (s *Service) ApplyEnvironmentDeployment(ctx context.Context, environment *m
 		},
 		Include: []include.Include{
 			{
-				Relation: "ApplicationEnvVar",
+				Relation: "ApplicationEnvVars",
 			},
 		},
 	}, &apps)
+
+	err := s.orchestrator.CreateNamespace(ctx, environment.Namespace)
+	if err != nil {
+		return err
+	}
 
 	for _, app := range apps {
 		s.orchestrator.CreateDeployment(ctx, &orchestrator.Deployment{

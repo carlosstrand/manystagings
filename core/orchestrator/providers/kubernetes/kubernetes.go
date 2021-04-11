@@ -65,6 +65,17 @@ func (k *Kubernetes) checkDeploymentExists(ctx context.Context, deployment *orch
 	return false, err
 }
 
+func envMapToK8sEnvVar(envMap map[string]string) []apiv1.EnvVar {
+	vars := make([]apiv1.EnvVar, 0)
+	for key, value := range envMap {
+		vars = append(vars, apiv1.EnvVar{
+			Name:  key,
+			Value: value,
+		})
+	}
+	return vars
+}
+
 func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
 	exists, err := k.checkDeploymentExists(ctx, deployment)
 	if err != nil {
@@ -108,6 +119,7 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 									ContainerPort: 80,
 								},
 							},
+							Env: envMapToK8sEnvVar(deployment.Env),
 						},
 					},
 				},

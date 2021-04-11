@@ -53,6 +53,7 @@ func (app *App) Init() {
 	app.setupLinker()
 	app.setupAdmin()
 	app.setupService()
+	app.setupControllers()
 	app.Zepto.SetupHTTP("0.0.0.0:8000")
 }
 
