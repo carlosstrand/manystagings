@@ -10,9 +10,6 @@ func (a *App) setupControllers() {
 		Linker:  a.Linker,
 	})
 
-	// Controller CLI Router is
-	cliRouter := a.Zepto.Router("/cli/api")
-	cliRouter.Get("/environments", ctrls.EnvironmentGetList)
-	cliRouter.Get("/environments/{id}", ctrls.EnvironmentGetById)
-	cliRouter.Post("/environments/{id}/apply-deployment", ctrls.EnvironmentApplyDeployment)
+	// Additional CLI routes
+	a.apiRouter.Post("/environments/{id}/apply-deployment", ctrls.EnvironmentApplyDeployment)
 }

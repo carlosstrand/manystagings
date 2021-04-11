@@ -2,8 +2,13 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 
+	"context"
+
+	"github.com/carlosstrand/manystagings/cli/manystagings/client"
+	"github.com/carlosstrand/manystagings/models"
 	"github.com/manifoldco/promptui"
 )
 
@@ -37,13 +42,17 @@ func PromptConfigureToken() (string, error) {
 	return prompt.Run()
 }
 
-func PromptSelectEnvironment() (string, error) {
-	prompt := promptui.Select{
-		Label: "Select a Environment",
-		Items: []string{},
+func PromptSelectEnvironment(envs []*models.Environment) (*models.Environment, error) {
+	envOptions := make([]string, 0)
+	for _, env := range envs {
+		envOptions = append(envOptions, env.Name)
 	}
-	_, result, err := prompt.Run()
-	return result, err
+	prompt := promptui.Select{
+		Label: "Select an Environment",
+		Items: envOptions,
+	}
+	idx, _, err := prompt.Run()
+	return envs[idx], err
 }
 
 func ConfiguteAction() error {
@@ -51,13 +60,15 @@ func ConfiguteAction() error {
 	if err != nil {
 		return err
 	}
-	token, err := PromptConfigureToken()
+	client := client.NewClient(hostURL + "/api")
+	envs, err := client.GetEnvironments(context.TODO())
 	if err != nil {
 		return err
 	}
-	environmentId, err := PromptSelectEnvironment()
+	env, err := PromptSelectEnvironment(envs.Data)
 	if err != nil {
 		return err
 	}
+	fmt.Println(env)
 	return nil
 }
