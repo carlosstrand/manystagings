@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/carlosstrand/manystagings/consts"
 	"github.com/carlosstrand/manystagings/core/service"
 	"github.com/go-zepto/zepto"
 	"github.com/go-zepto/zepto/plugins/linker"
@@ -32,7 +33,7 @@ func NewApp(opts Options) *App {
 	}
 	zopts := []zepto.Option{
 		zepto.Name("manystagings"),
-		zepto.Version("0.0.1"),
+		zepto.Version(consts.VERSION),
 		zepto.Logger(log.New()),
 	}
 	if opts.Logger != nil {

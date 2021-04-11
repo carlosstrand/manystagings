@@ -42,6 +42,10 @@ func NewKubernetesProvider(opts Options) *Kubernetes {
 	}
 }
 
+func (k *Kubernetes) Provider() string {
+	return "kubernetes"
+}
+
 func (k *Kubernetes) CreateNamespace(ctx context.Context, namespace string) error {
 	_, err := k.clientset.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if k8serrors.IsNotFound(err) {

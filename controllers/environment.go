@@ -16,20 +16,3 @@ func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 	}
 	return renderAccepted(ctx)
 }
-
-func (c *Controllers) EnvironmentGetList(ctx web.Context) error {
-	envList, err := c.svc.EnvironmentGetList(ctx)
-	if err != nil {
-		return renderError(ctx, err, 500)
-	}
-	return ctx.RenderJson(envList)
-}
-
-func (c *Controllers) EnvironmentGetById(ctx web.Context) error {
-	envID := ctx.Params()["id"]
-	env, err := c.svc.EnvironmentGetById(ctx, envID)
-	if err != nil {
-		return renderError(ctx, err, 500)
-	}
-	return ctx.RenderJson(env)
-}

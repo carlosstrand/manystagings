@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/carlosstrand/manystagings/core/service"
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/plugins/auth/authcore"
 )
@@ -70,6 +71,24 @@ func (c *Client) Auth(ctx context.Context, username string, password string) (*a
 		return nil, err
 	}
 	return &tokenRes.Token, nil
+}
+
+func (c *Client) GetInfo(ctx context.Context) (*service.Info, error) {
+	var info service.Info
+	path := c.withBaseURL("/api/info")
+	req, err := http.NewRequest("GET", path, nil)
+	if c.authToken != "" {
+		req.Header.Add("Authorization", "Bearer "+c.authToken)
+	}
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errStatusFromRes(res)
+	}
+	json.NewDecoder(res.Body).Decode(&info)
+	return &info, nil
 }
 
 func (c *Client) GetEnvironments(ctx context.Context) (*EnvironmentList, error) {

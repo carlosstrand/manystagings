@@ -91,10 +91,20 @@ func ConfiguteAction() error {
 	if err != nil {
 		return err
 	}
-	msconfig.SaveConfig(&msconfig.ManyStagingsConfig{
-		Token:            token.Value,
-		EnvironmentID:    env.ID,
-		KubeconfigBase64: "",
-	})
+	info, err := client.GetInfo(context.TODO())
+	if err != nil {
+		return err
+	}
+	config := &msconfig.ManyStagingsConfig{
+		Token:                token.Value,
+		EnvironmentID:        env.ID,
+		OrchestratorProvider: info.Orchestrator,
+	}
+	// Add Kubernetes Specific Config
+	// TODO: Add a section for provider in TOML to make it scalable
+	if config.OrchestratorProvider == "kubernetes" {
+
+	}
+	msconfig.SaveConfig(config)
 	return nil
 }

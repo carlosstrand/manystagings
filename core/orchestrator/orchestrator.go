@@ -39,6 +39,9 @@ type Deployment struct {
 }
 
 type Orchestrator interface {
+	// Provider name (e.g. kubernetes)
+	Provider() string
+
 	// Create a namespace. Every namespace should be unique for environment
 	CreateNamespace(ctx context.Context, namespace string) error
 

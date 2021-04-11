@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/carlosstrand/manystagings/consts"
 	"github.com/carlosstrand/manystagings/core/orchestrator"
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/plugins/linker"
@@ -30,6 +31,11 @@ type EnvironmentList struct {
 	Count int64                 `json:"count"`
 }
 
+type Info struct {
+	Version      string `json:"version"`
+	Orchestrator string `json:"orchestrator"`
+}
+
 func NewService(opts Options) *Service {
 	return &Service{
 		db:           opts.DB,
@@ -44,6 +50,14 @@ func appEnvVarsToMap(appEnvVars []models.ApplicationEnvVar) map[string]string {
 		env[v.Key] = v.Value
 	}
 	return env
+}
+
+func (s *Service) GetInfo() *Info {
+	info := &Info{
+		Version:      consts.VERSION,
+		Orchestrator: s.orchestrator.Provider(),
+	}
+	return info
 }
 
 func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment) error {
@@ -79,25 +93,4 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 	}
 
 	return nil
-}
-
-func (s *Service) EnvironmentGetList(ctx context.Context) (*EnvironmentList, error) {
-	var envList EnvironmentList
-	limit := int64(MAX_ENVIRONMENTS)
-	err := s.linker.RepositoryDecoder("Environment").Find(ctx, &filter.Filter{
-		Limit: &limit,
-	}, &envList)
-	if err != nil {
-		return nil, err
-	}
-	return &envList, nil
-}
-
-func (s *Service) EnvironmentGetById(ctx context.Context, id string) (*models.Environment, error) {
-	var env models.Environment
-	err := s.linker.RepositoryDecoder("Environment").FindById(ctx, id, &env)
-	if err != nil {
-		return nil, err
-	}
-	return &env, nil
 }
