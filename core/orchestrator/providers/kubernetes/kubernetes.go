@@ -2,6 +2,11 @@ package kubernetes
 
 import (
 	"context"
+	"encoding/base64"
+	"errors"
+	"io/ioutil"
+	"os"
+	"path"
 
 	"github.com/carlosstrand/manystagings/core/orchestrator"
 	"github.com/sirupsen/logrus"
@@ -13,17 +18,44 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+var ErrCouldNotLoadKubeconfig = errors.New("could not load kubeconfig")
+
 type Kubernetes struct {
 	clientset *kubernetes.Clientset
 	logger    *logrus.Logger
+	settings  map[string]interface{}
 }
 
 type Options struct {
 	LogLevel logrus.Level
 }
 
+func loadConfigYaml() (string, error) {
+	kubeconfigBase64 := os.Getenv("KUBERNETES_KUBECONFIG_BASE64")
+	if kubeconfigBase64 != "" {
+		decoded, err := base64.StdEncoding.DecodeString(kubeconfigBase64)
+		if err != nil {
+			return "", ErrCouldNotLoadKubeconfig
+		}
+		return string(decoded), nil
+	}
+	file, err := ioutil.ReadFile(path.Join(userHomeDir(), ".kube", "/config"))
+	if err != nil {
+		return "", err
+	}
+	return string(file), nil
+}
+
+func encodeBase64(data string) string {
+	return base64.StdEncoding.EncodeToString([]byte(data))
+}
+
 func NewKubernetesProvider(opts Options) *Kubernetes {
-	config, err := clientcmd.BuildConfigFromFlags("", "/Users/carlosstrand/.kube/config")
+	configYaml, err := loadConfigYaml()
+	if err != nil {
+		panic(err)
+	}
+	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(configYaml))
 	if err != nil {
 		panic(err)
 	}
@@ -39,11 +71,18 @@ func NewKubernetesProvider(opts Options) *Kubernetes {
 	return &Kubernetes{
 		clientset: clientset,
 		logger:    logger,
+		settings: map[string]interface{}{
+			"KUBECONFIG_BASE_64": encodeBase64(configYaml),
+		},
 	}
 }
 
 func (k *Kubernetes) Provider() string {
 	return "kubernetes"
+}
+
+func (k *Kubernetes) Settings() map[string]interface{} {
+	return k.settings
 }
 
 func (k *Kubernetes) CreateNamespace(ctx context.Context, namespace string) error {

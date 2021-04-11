@@ -42,6 +42,9 @@ type Orchestrator interface {
 	// Provider name (e.g. kubernetes)
 	Provider() string
 
+	// Get the current orchestror settings
+	Settings() map[string]interface{}
+
 	// Create a namespace. Every namespace should be unique for environment
 	CreateNamespace(ctx context.Context, namespace string) error
 

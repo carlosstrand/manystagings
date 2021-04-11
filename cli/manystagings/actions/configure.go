@@ -98,12 +98,8 @@ func ConfiguteAction() error {
 	config := &msconfig.ManyStagingsConfig{
 		Token:                token.Value,
 		EnvironmentID:        env.ID,
-		OrchestratorProvider: info.Orchestrator,
-	}
-	// Add Kubernetes Specific Config
-	// TODO: Add a section for provider in TOML to make it scalable
-	if config.OrchestratorProvider == "kubernetes" {
-
+		OrchestratorProvider: info.OrchestratorProvider,
+		OrchestratorSettings: info.OrchestratorSettings,
 	}
 	msconfig.SaveConfig(config)
 	return nil

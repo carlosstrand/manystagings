@@ -32,8 +32,9 @@ type EnvironmentList struct {
 }
 
 type Info struct {
-	Version      string `json:"version"`
-	Orchestrator string `json:"orchestrator"`
+	Version              string                 `json:"version"`
+	OrchestratorProvider string                 `json:"orchestrator_provider"`
+	OrchestratorSettings map[string]interface{} `json:"orchestrator_settings"`
 }
 
 func NewService(opts Options) *Service {
@@ -54,8 +55,9 @@ func appEnvVarsToMap(appEnvVars []models.ApplicationEnvVar) map[string]string {
 
 func (s *Service) GetInfo() *Info {
 	info := &Info{
-		Version:      consts.VERSION,
-		Orchestrator: s.orchestrator.Provider(),
+		Version:              consts.VERSION,
+		OrchestratorProvider: s.orchestrator.Provider(),
+		OrchestratorSettings: s.orchestrator.Settings(),
 	}
 	return info
 }

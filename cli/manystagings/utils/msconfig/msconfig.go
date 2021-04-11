@@ -31,10 +31,10 @@ func configFilePath() string {
 }
 
 type ManyStagingsConfig struct {
-	Token                string `toml:"token"`
-	EnvironmentID        string `toml:"environment_id"`
-	OrchestratorProvider string `toml:"orchestrator_provider"`
-	KubeconfigBase64     string `toml:"kubeconfig_base64"`
+	Token                string                 `toml:"token"`
+	EnvironmentID        string                 `toml:"environment_id"`
+	OrchestratorProvider string                 `toml:"orchestrator_provider"`
+	OrchestratorSettings map[string]interface{} `toml:"orchestrator_settings"`
 }
 
 func SaveConfig(config *ManyStagingsConfig) error {
