@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -8,7 +9,11 @@ import (
 )
 
 func AutoMigrateDB(db *gorm.DB) {
-	db.AutoMigrate()
+	db.AutoMigrate(
+		&models.Environment{},
+		&models.Application{},
+		&models.ApplicationEnvVar{},
+	)
 }
 
 func CreateDB() (*gorm.DB, error) {

@@ -48,6 +48,8 @@ func NewApp(opts Options) *App {
 }
 
 func (app *App) Init() {
+	app.setupLinker()
+	app.setupAdmin()
 	app.Zepto.SetupHTTP("0.0.0.0:8000")
 }
 
