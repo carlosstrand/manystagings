@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/carlosstrand/manystagings/core/service"
 	"github.com/go-zepto/zepto"
 	"github.com/go-zepto/zepto/plugins/linker"
 	"github.com/go-zepto/zepto/web"
@@ -12,6 +13,7 @@ type App struct {
 	DB        *gorm.DB
 	Zepto     *zepto.Zepto
 	Linker    *linker.Linker
+	Service   *service.Service
 	apiRouter *web.Router
 }
 
@@ -50,6 +52,7 @@ func NewApp(opts Options) *App {
 func (app *App) Init() {
 	app.setupLinker()
 	app.setupAdmin()
+	app.setupService()
 	app.Zepto.SetupHTTP("0.0.0.0:8000")
 }
 
