@@ -14,6 +14,11 @@ func (a *App) setupAdmin() {
 			Label:              "Environments",
 			LinkToResourceName: "Environment",
 		},
+		{
+			Icon:               "settings",
+			Label:              "Config",
+			LinkToResourceName: "Config",
+		},
 	}
 
 	// Environment
@@ -34,6 +39,9 @@ func (a *App) setupAdmin() {
 		RemoveField("updated_at").
 		AddField(fields.NewTextField("key", nil)).
 		AddField(fields.NewTextField("value", nil))
+
+	// Config
+	admin.Resource("Config")
 
 	a.Zepto.AddPlugin(linkeradmin.NewLinkerAdminPlugin(linkeradmin.Options{
 		Admin: admin,

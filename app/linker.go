@@ -24,6 +24,11 @@ func (a *App) setupLinker() {
 		Datasource: gormds.NewGormDatasource(a.DB, &models.ApplicationEnvVar{}),
 	})
 
+	a.Linker.AddResource(linker.Resource{
+		Name:       "Config",
+		Datasource: gormds.NewGormDatasource(a.DB, &models.Config{}),
+	})
+
 	a.Zepto.AddPlugin(linker.NewLinkerPlugin(linker.Options{
 		Linker: a.Linker,
 	}))

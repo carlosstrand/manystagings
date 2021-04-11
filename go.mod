@@ -3,6 +3,7 @@ module github.com/carlosstrand/manystagings
 go 1.16
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680 // indirect
@@ -11,6 +12,7 @@ require (
 	github.com/gophercloud/gophercloud v0.1.0 // indirect
 	github.com/gosimple/slug v1.9.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/urfave/cli v1.22.5
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/gorm v1.21.7
 	k8s.io/api v0.21.0 // indirect

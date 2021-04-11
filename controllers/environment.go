@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
-	envID := ctx.Params()["environment_id"]
+	envID := ctx.Params()["id"]
 	var env *models.Environment
 	if err := c.linker.RepositoryDecoder("Environment").FindById(ctx, envID, &env); err != nil {
 		return renderError(ctx, err, 400)
@@ -15,4 +15,21 @@ func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 		return renderError(ctx, err, 400)
 	}
 	return renderAccepted(ctx)
+}
+
+func (c *Controllers) EnvironmentGetList(ctx web.Context) error {
+	envList, err := c.svc.EnvironmentGetList(ctx)
+	if err != nil {
+		return renderError(ctx, err, 500)
+	}
+	return ctx.RenderJson(envList)
+}
+
+func (c *Controllers) EnvironmentGetById(ctx web.Context) error {
+	envID := ctx.Params()["id"]
+	env, err := c.svc.EnvironmentGetById(ctx, envID)
+	if err != nil {
+		return renderError(ctx, err, 500)
+	}
+	return ctx.RenderJson(env)
 }

@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const MAX_ENVIRONMENTS = 20
+
 type Options struct {
 	DB           *gorm.DB
 	Linker       *linker.Linker
@@ -21,6 +23,11 @@ type Service struct {
 	db           *gorm.DB
 	linker       *linker.Linker
 	orchestrator orchestrator.Orchestrator
+}
+
+type EnvironmentList struct {
+	Data  []*models.Environment `json:"data"`
+	Count int64                 `json:"count"`
 }
 
 func NewService(opts Options) *Service {
@@ -72,4 +79,25 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 	}
 
 	return nil
+}
+
+func (s *Service) EnvironmentGetList(ctx context.Context) (*EnvironmentList, error) {
+	var envList EnvironmentList
+	limit := int64(MAX_ENVIRONMENTS)
+	err := s.linker.RepositoryDecoder("Environment").Find(ctx, &filter.Filter{
+		Limit: &limit,
+	}, &envList)
+	if err != nil {
+		return nil, err
+	}
+	return &envList, nil
+}
+
+func (s *Service) EnvironmentGetById(ctx context.Context, id string) (*models.Environment, error) {
+	var env models.Environment
+	err := s.linker.RepositoryDecoder("Environment").FindById(ctx, id, &env)
+	if err != nil {
+		return nil, err
+	}
+	return &env, nil
 }
