@@ -1,11 +1,8 @@
 package app
 
 import (
-	"errors"
-
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/utils"
-	"github.com/google/uuid"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,21 +13,8 @@ func AutoMigrateDB(db *gorm.DB) {
 		&models.Environment{},
 		&models.Application{},
 		&models.ApplicationEnvVar{},
-		&models.Config{},
+		&models.User{},
 	)
-}
-
-// Initialize the config dataset
-func initConfigDataset(db *gorm.DB) error {
-	var c models.Config
-	if err := db.Where("key = ?", "TOKEN").Find(&c).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		tokenConfig := models.Config{
-			Key:   "TOKEN",
-			Value: uuid.NewString(),
-		}
-		return db.Create(&tokenConfig).Error
-	}
-	return nil
 }
 
 func CreateDB() (*gorm.DB, error) {
@@ -44,7 +28,6 @@ func CreateDB() (*gorm.DB, error) {
 
 	AutoMigrateDB(db)
 
-	err = initConfigDataset(db)
 	if err != nil {
 		return nil, err
 	}

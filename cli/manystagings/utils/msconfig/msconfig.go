@@ -1,6 +1,7 @@
 package msconfig
 
 import (
+	"bufio"
 	"io/ioutil"
 	"os"
 	"path"
@@ -25,13 +26,29 @@ func userHomeDir() string {
 	return os.Getenv("HOME")
 }
 
+func configFilePath() string {
+	return path.Join(userHomeDir(), ".manystagingsrc")
+}
+
 type ManyStagingsConfig struct {
+	Token            string `toml:"token"`
+	EnvironmentID    string `toml:"environment_id"`
 	KubeconfigBase64 string `toml:"kubeconfig_base64"`
 }
 
-func LoadManyStagingsConfig() (*ManyStagingsConfig, error) {
+func SaveConfig(config *ManyStagingsConfig) error {
+	f, err := os.Create(configFilePath())
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := bufio.NewWriter(f)
+	return toml.NewEncoder(w).Encode(&config)
+}
+
+func LoadConfig() (*ManyStagingsConfig, error) {
 	var config ManyStagingsConfig
-	configData, err := ioutil.ReadFile(path.Join(userHomeDir(), ".manystagingsrc"))
+	configData, err := ioutil.ReadFile(configFilePath())
 	if err != nil {
 		return nil, err
 	}

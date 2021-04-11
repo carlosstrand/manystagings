@@ -40,9 +40,6 @@ func (a *App) setupAdmin() {
 		AddField(fields.NewTextField("key", nil)).
 		AddField(fields.NewTextField("value", nil))
 
-	// Config
-	admin.Resource("Config")
-
 	a.Zepto.AddPlugin(linkeradmin.NewLinkerAdminPlugin(linkeradmin.Options{
 		Admin: admin,
 		Path:  "/admin",

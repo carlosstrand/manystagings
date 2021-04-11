@@ -50,10 +50,13 @@ func NewApp(opts Options) *App {
 }
 
 func (app *App) Init() {
+	app.setupMailer()
+	app.setupAuth()
 	app.setupLinker()
 	app.setupAdmin()
 	app.setupService()
 	app.setupControllers()
+	app.bootstrap()
 	app.Zepto.SetupHTTP("0.0.0.0:8000")
 }
 

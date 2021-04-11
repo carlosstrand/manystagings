@@ -2,15 +2,22 @@ package actions
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
 
 	"context"
 
 	"github.com/carlosstrand/manystagings/cli/manystagings/client"
+	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/manifoldco/promptui"
 )
+
+func validateRequiredString(input string) error {
+	if len(input) == 0 {
+		return errors.New("Field is required")
+	}
+	return nil
+}
 
 func PromptConfigureHostUrl() (string, error) {
 	validate := func(input string) error {
@@ -27,16 +34,18 @@ func PromptConfigureHostUrl() (string, error) {
 	return prompt.Run()
 }
 
-func PromptConfigureToken() (string, error) {
-	validate := func(input string) error {
-		if len(input) != 32 {
-			return errors.New("Invalid token. It must be 32 characters")
-		}
-		return nil
-	}
+func PromptConfigureUsername() (string, error) {
 	prompt := promptui.Prompt{
-		Label:    "Token",
-		Validate: validate,
+		Label:    "Username",
+		Validate: validateRequiredString,
+	}
+	return prompt.Run()
+}
+
+func PromptConfigurePassword() (string, error) {
+	prompt := promptui.Prompt{
+		Label:    "Password",
+		Validate: validateRequiredString,
 		Mask:     '*',
 	}
 	return prompt.Run()
@@ -60,15 +69,32 @@ func ConfiguteAction() error {
 	if err != nil {
 		return err
 	}
-	client := client.NewClient(hostURL + "/api")
-	envs, err := client.GetEnvironments(context.TODO())
+	username, err := PromptConfigureUsername()
 	if err != nil {
 		return err
 	}
-	env, err := PromptSelectEnvironment(envs.Data)
+	password, err := PromptConfigurePassword()
 	if err != nil {
 		return err
 	}
-	fmt.Println(env)
+	client := client.NewClient(hostURL)
+	token, err := client.Auth(context.TODO(), username, password)
+	if err != nil {
+		return err
+	}
+	client.SetAuthToken(token.Value)
+	envOptions, err := client.GetEnvironments(context.TODO())
+	if err != nil {
+		return err
+	}
+	env, err := PromptSelectEnvironment(envOptions.Data)
+	if err != nil {
+		return err
+	}
+	msconfig.SaveConfig(&msconfig.ManyStagingsConfig{
+		Token:            token.Value,
+		EnvironmentID:    env.ID,
+		KubeconfigBase64: "",
+	})
 	return nil
 }
