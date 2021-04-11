@@ -64,7 +64,7 @@ func PromptSelectEnvironment(envs []*models.Environment) (*models.Environment, e
 	return envs[idx], err
 }
 
-func ConfiguteAction() error {
+func (a *Actions) Configure() error {
 	hostURL, err := PromptConfigureHostUrl()
 	if err != nil {
 		return err
@@ -97,6 +97,7 @@ func ConfiguteAction() error {
 	}
 	config := &msconfig.ManyStagingsConfig{
 		Token:                token.Value,
+		LogLevel:             "debug",
 		EnvironmentID:        env.ID,
 		OrchestratorProvider: info.OrchestratorProvider,
 		OrchestratorSettings: info.OrchestratorSettings,

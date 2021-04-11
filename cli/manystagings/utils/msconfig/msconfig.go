@@ -33,6 +33,7 @@ func configFilePath() string {
 type ManyStagingsConfig struct {
 	Token                string                 `toml:"token"`
 	EnvironmentID        string                 `toml:"environment_id"`
+	LogLevel             string                 `toml:"log_level"`
 	OrchestratorProvider string                 `toml:"orchestrator_provider"`
 	OrchestratorSettings map[string]interface{} `toml:"orchestrator_settings"`
 }
@@ -55,6 +56,9 @@ func LoadConfig() (*ManyStagingsConfig, error) {
 	}
 	if _, err := toml.Decode(string(configData), &config); err != nil {
 		return nil, err
+	}
+	if config.LogLevel == "" {
+		config.LogLevel = "info"
 	}
 	return &config, nil
 }
