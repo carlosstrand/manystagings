@@ -11,6 +11,7 @@ require (
 	github.com/gophercloud/gophercloud v0.1.0 // indirect
 	github.com/gosimple/slug v1.9.0 // indirect
 	github.com/manifoldco/promptui v0.8.0 // indirect
+	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
@@ -21,5 +22,6 @@ require (
 	k8s.io/cli-runtime v0.21.0
 	k8s.io/client-go v0.21.0 // indirect
 	k8s.io/klog v1.0.0 // indirect
+	k8s.io/kubectl v0.21.0
 	sigs.k8s.io/structured-merge-diff/v3 v3.0.0-20200207200219-5e70324e7c1c // indirect
 )

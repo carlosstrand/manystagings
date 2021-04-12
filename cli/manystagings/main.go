@@ -53,6 +53,14 @@ func main() {
 					return a.ProxyDeployment(c)
 				},
 			},
+			{
+				Name:    "exec",
+				Aliases: []string{"e"},
+				Usage:   "Exec a command into an application container",
+				Action: func(c *cli.Context) error {
+					return a.ExecDeployment(c)
+				},
+			},
 		},
 	}
 
