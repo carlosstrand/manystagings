@@ -113,7 +113,7 @@ func (k *KubernetesCLIProvider) ProxyDeployment(ctx context.Context, deployment 
 	case <-readyCh:
 		break
 	}
-	println("Port forwarding is ready to get traffic. have fun!")
+	println("Port forwarding is ready to get traffic. have fun and enjoy ManyStagings!")
 
 	wg.Wait()
 	return nil

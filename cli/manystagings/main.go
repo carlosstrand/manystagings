@@ -48,7 +48,7 @@ func main() {
 			{
 				Name:    "proxy",
 				Aliases: []string{"p"},
-				Usage:   "configure the manystagins CLI",
+				Usage:   "Proxy to an application inside your staging",
 				Action: func(c *cli.Context) error {
 					return a.ProxyDeployment(c)
 				},
