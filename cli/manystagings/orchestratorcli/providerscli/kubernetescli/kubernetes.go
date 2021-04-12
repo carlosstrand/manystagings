@@ -7,14 +7,16 @@ import (
 	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 var ErrKubeconfigNofConfigured = errors.New("kubeconfig not configured")
 
 type KubernetesCLIProvider struct {
-	clientset *kubernetes.Clientset
-	logger    *logrus.Logger
+	clientset  *kubernetes.Clientset
+	restconfig *rest.Config
+	logger     *logrus.Logger
 }
 
 type Options struct {
@@ -49,12 +51,8 @@ func NewKubernetesCLIProvider(opts Options) *KubernetesCLIProvider {
 	}
 	logger.SetLevel(loglevel)
 	return &KubernetesCLIProvider{
-		clientset: clientset,
-		logger:    logger,
+		clientset:  clientset,
+		logger:     logger,
+		restconfig: config,
 	}
-}
-
-func (k *KubernetesCLIProvider) ProxyApp(namespace string, app string) error {
-	k.logger.Infof("Proxying '%s' (namespace=%s)...", app, namespace)
-	return nil
 }

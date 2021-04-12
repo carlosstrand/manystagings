@@ -14,6 +14,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -108,6 +109,50 @@ func (k *Kubernetes) checkDeploymentExists(ctx context.Context, deployment *orch
 	return false, err
 }
 
+func (k *Kubernetes) checkServiceExists(ctx context.Context, deployment *orchestrator.Deployment) (exists bool, err error) {
+	serviceClient := k.clientset.CoreV1().Services(deployment.Namespace)
+	_, err = serviceClient.Get(ctx, deployment.Name, metav1.GetOptions{})
+	if err == nil {
+		return true, nil
+	} else if k8serrors.IsNotFound(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func (k *Kubernetes) createService(ctx context.Context, deployment *orchestrator.Deployment) error {
+	serviceClient := k.clientset.CoreV1().Services(deployment.Namespace)
+	service := &apiv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.Name,
+			Namespace: deployment.Namespace,
+			Labels: map[string]string{
+				"run": deployment.Name,
+			},
+		},
+		Spec: apiv1.ServiceSpec{
+			Selector: map[string]string{
+				"run": deployment.Name,
+			},
+			Ports: []apiv1.ServicePort{
+				{
+					Name: "http",
+					Port: 80,
+					// TODO: Use real target port
+					TargetPort: intstr.FromInt(80),
+				},
+			},
+		},
+	}
+	_, err := serviceClient.Create(ctx, service, metav1.CreateOptions{})
+	return err
+}
+
+func (k *Kubernetes) deleteService(ctx context.Context, deployment *orchestrator.Deployment) error {
+	serviceClient := k.clientset.CoreV1().Services(deployment.Namespace)
+	return serviceClient.Delete(ctx, deployment.Name, metav1.DeleteOptions{})
+}
+
 func envMapToK8sEnvVar(envMap map[string]string) []apiv1.EnvVar {
 	vars := make([]apiv1.EnvVar, 0)
 	for key, value := range envMap {
@@ -141,13 +186,13 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": deployment.Name,
+					"run": deployment.Name,
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": deployment.Name,
+						"run": deployment.Name,
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -157,8 +202,9 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 							Image: deployment.DockerImage.ToString(),
 							Ports: []apiv1.ContainerPort{
 								{
-									Name:          "http",
-									Protocol:      apiv1.ProtocolTCP,
+									Name:     "http",
+									Protocol: apiv1.ProtocolTCP,
+									// TODO: Use real container Port
 									ContainerPort: 80,
 								},
 							},
@@ -174,7 +220,16 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 	if err != nil {
 		return err
 	}
-	return nil
+	exists, err = k.checkServiceExists(ctx, deployment)
+	if exists {
+		k.logger.Debugf("Service '%s' already exists. Deleting current service...", deployment.Name)
+		err := k.deleteService(ctx, deployment)
+		if err != nil {
+			return err
+		}
+	}
+	k.logger.Debugf("Creating service '%s'...", deployment.Name)
+	return k.createService(ctx, deployment)
 }
 
 func (k *Kubernetes) DeleteDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
