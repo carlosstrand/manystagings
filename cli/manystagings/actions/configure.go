@@ -96,6 +96,7 @@ func (a *Actions) Configure() error {
 		return err
 	}
 	config := &msconfig.ManyStagingsConfig{
+		HostURL:              hostURL,
 		Token:                token.Value,
 		LogLevel:             "debug",
 		EnvironmentID:        env.ID,

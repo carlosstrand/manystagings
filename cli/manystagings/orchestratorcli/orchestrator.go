@@ -1,5 +1,11 @@
 package orchestratorcli
 
+import (
+	"context"
+
+	"github.com/carlosstrand/manystagings/core/orchestrator"
+)
+
 type OrchestratorCLI interface {
-	ProxyApp(namespace string, app string) error
+	ProxyDeployment(ctx context.Context, deployment *orchestrator.Deployment) error
 }

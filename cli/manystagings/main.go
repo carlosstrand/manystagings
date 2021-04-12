@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/carlosstrand/manystagings/cli/manystagings/actions"
+	"github.com/carlosstrand/manystagings/cli/manystagings/client"
 	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli"
 	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli/providerscli/kubernetescli"
 	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
@@ -25,8 +26,12 @@ func main() {
 			Config: config,
 		})
 	}
+	client := client.NewClient(config.HostURL)
+	client.SetAuthToken(config.Token)
 	a := actions.NewActions(actions.Options{
 		OrchestratorCLI: orchestratorCLI,
+		Client:          client,
+		Config:          config,
 	})
 	app := &cli.App{
 		Name:  "configure",
@@ -45,7 +50,7 @@ func main() {
 				Aliases: []string{"p"},
 				Usage:   "configure the manystagins CLI",
 				Action: func(c *cli.Context) error {
-					return a.ProxyApp(c)
+					return a.ProxyDeployment(c)
 				},
 			},
 		},

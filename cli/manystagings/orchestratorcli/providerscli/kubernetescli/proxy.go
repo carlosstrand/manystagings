@@ -1,6 +1,7 @@
 package kubernetescli
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,6 +11,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/carlosstrand/manystagings/core/orchestrator"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -53,7 +55,11 @@ func PortForwardAPod(req PortForwardAPodRequest) error {
 	return fw.ForwardPorts()
 }
 
-func (k *KubernetesCLIProvider) ProxyApp(namespace string, app string) error {
+func (k *KubernetesCLIProvider) ProxyDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
+	podName, err := k.getPodByDeployment(ctx, deployment)
+	if err != nil {
+		return err
+	}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	// stopCh control the port forwarding lifecycle. When it gets closed the
@@ -88,8 +94,8 @@ func (k *KubernetesCLIProvider) ProxyApp(namespace string, app string) error {
 			RestConfig: k.restconfig,
 			Pod: v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "nginx-594f76f7f6-75n5b",
-					Namespace: "carlos",
+					Name:      podName,
+					Namespace: deployment.Namespace,
 				},
 			},
 			LocalPort: 8080,

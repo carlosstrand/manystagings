@@ -7,10 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/carlosstrand/manystagings/core/service"
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/plugins/auth/authcore"
+	"github.com/go-zepto/zepto/plugins/linker/filter"
+	"github.com/go-zepto/zepto/plugins/linker/filter/include"
 )
 
 var ErrUnauthorized = errors.New("unauthorized")
@@ -23,6 +26,11 @@ type Client struct {
 
 type EnvironmentList struct {
 	Data  []*models.Environment `json:"data"`
+	Count int64                 `json:"count"`
+}
+
+type ApplicationList struct {
+	Data  []*models.Application `json:"data"`
 	Count int64                 `json:"count"`
 }
 
@@ -107,4 +115,41 @@ func (c *Client) GetEnvironments(ctx context.Context) (*EnvironmentList, error) 
 	}
 	json.NewDecoder(res.Body).Decode(&envList)
 	return &envList, nil
+}
+
+func (c *Client) GetEnvironmentApplications(ctx context.Context, envID string) (*ApplicationList, error) {
+	var appList ApplicationList
+	filter := filter.Filter{
+		Where: &map[string]interface{}{
+			"environment_id": map[string]interface{}{
+				"eq": envID,
+			},
+		},
+		Include: []include.Include{
+			{
+				Relation: "Environment",
+			},
+		},
+	}
+	filterJson, err := json.Marshal(filter)
+	if err != nil {
+		return nil, err
+	}
+	params := url.Values{}
+	params.Add("filter", string(filterJson))
+	query := params.Encode()
+	path := c.withBaseURL("/api/applications?" + query)
+	req, err := http.NewRequest("GET", path, nil)
+	if c.authToken != "" {
+		req.Header.Add("Authorization", "Bearer "+c.authToken)
+	}
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errStatusFromRes(res)
+	}
+	json.NewDecoder(res.Body).Decode(&appList)
+	return &appList, nil
 }

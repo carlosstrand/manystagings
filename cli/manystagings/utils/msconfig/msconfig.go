@@ -32,6 +32,7 @@ func configFilePath() string {
 
 type ManyStagingsConfig struct {
 	Token                string                 `toml:"token"`
+	HostURL              string                 `toml:"host_url"`
 	EnvironmentID        string                 `toml:"environment_id"`
 	LogLevel             string                 `toml:"log_level"`
 	OrchestratorProvider string                 `toml:"orchestrator_provider"`
