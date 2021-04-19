@@ -11,31 +11,33 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 )
 
-func (k *KubernetesCLIProvider) ExecDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
+func (k *KubernetesCLIProvider) ExecDeployment(ctx context.Context, deployment *orchestrator.Deployment, command []string) error {
 	podName, err := k.getPodByDeployment(ctx, deployment)
 	if err != nil {
 		return ErrCouldNotFindRunningPod
 	}
 	return k.ExecCmd(ExecCmdOptions{
-		PodName: podName,
-		Command: []string{"ls"},
-		Stdin:   os.Stdin,
-		Stdout:  os.Stdout,
-		Stderr:  os.Stderr,
+		Namespace: deployment.Namespace,
+		PodName:   podName,
+		Command:   command,
+		Stdin:     os.Stdin,
+		Stdout:    os.Stdout,
+		Stderr:    os.Stderr,
 	})
 }
 
 type ExecCmdOptions struct {
-	PodName string
-	Command []string
-	Stdin   io.Reader
-	Stdout  io.Writer
-	Stderr  io.Writer
+	Namespace string
+	PodName   string
+	Command   []string
+	Stdin     io.Reader
+	Stdout    io.Writer
+	Stderr    io.Writer
 }
 
 func (k *KubernetesCLIProvider) ExecCmd(opts ExecCmdOptions) error {
 	req := k.clientset.CoreV1().RESTClient().Post().Resource("pods").Name(opts.PodName).
-		Namespace("carlos").SubResource("exec")
+		Namespace(opts.Namespace).SubResource("exec")
 	option := &v1.PodExecOptions{
 		Command: opts.Command,
 		Stdin:   true,

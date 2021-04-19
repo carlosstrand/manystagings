@@ -116,8 +116,10 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 				Name: app.DockerImageName,
 				Tag:  app.DockerImageTag,
 			},
-			Namespace: environment.Namespace,
-			Env:       appEnvVarsToMap(app.ApplicationEnvVars),
+			Port:          app.Port,
+			ContainerPort: app.ContainerPort,
+			Namespace:     environment.Namespace,
+			Env:           appEnvVarsToMap(app.ApplicationEnvVars),
 		})
 	}
 

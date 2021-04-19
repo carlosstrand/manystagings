@@ -38,9 +38,6 @@ func main() {
 		Use:   "manystagings",
 		Short: "Setup your staging environment easily with manystagings",
 		Long:  `A Fast and Flexible staging manager built in Go.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			// Do Stuff Here
-		},
 	}
 
 	// Configure
@@ -78,16 +75,22 @@ func main() {
 
 	// Exec
 	rootCmd.AddCommand(&cobra.Command{
-		Use:   "exec",
-		Short: "execute a command into an application container",
+		Use:     "exec",
+		Short:   "execute a command into an application container",
+		Example: "manystagings exec [APP_NAME] -- [COMMAND]",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("application name required")
 			}
+			if cmd.ArgsLenAtDash() <= 0 {
+				return errors.New("missing exec command. Please run:\nmanystagings exec [APP_NAME] -- [COMMAND]")
+			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return a.ExecDeployment(args[0])
+			argsLenAtDash := cmd.ArgsLenAtDash()
+			execArgs := args[argsLenAtDash:]
+			return a.ExecDeployment(args[0], execArgs)
 		},
 	})
 

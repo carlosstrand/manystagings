@@ -17,6 +17,6 @@ type Application struct {
 	DockerImageTag     string              `json:"docker_image_tag"`
 	ShellCommand       string              `json:"shell_command"`
 	ApplicationEnvVars []ApplicationEnvVar `json:"application_env_vars"`
-	Port               int                 `json:"port"`
-	ContainerPort      int                 `json:"container_port"`
+	Port               int32               `json:"port"`
+	ContainerPort      int32               `json:"container_port"`
 }

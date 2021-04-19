@@ -138,10 +138,9 @@ func (k *Kubernetes) createService(ctx context.Context, deployment *orchestrator
 			},
 			Ports: []apiv1.ServicePort{
 				{
-					Name: "http",
-					Port: 80,
-					// TODO: Use real target port
-					TargetPort: intstr.FromInt(80),
+					Name:       "http",
+					Port:       deployment.Port,
+					TargetPort: intstr.FromInt(int(deployment.ContainerPort)),
 				},
 			},
 		},

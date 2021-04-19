@@ -34,6 +34,12 @@ type Deployment struct {
 	*/
 	DockerImage DeploymentDockerImage
 
+	// Port to exposte as service
+	Port int32
+
+	// ContainerPort is the port that the container will listen
+	ContainerPort int32
+
 	// Env is an environment variables map (key -> value)
 	Env map[string]string
 }
