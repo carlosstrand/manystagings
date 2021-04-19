@@ -52,6 +52,15 @@ func main() {
 		},
 	})
 
+	// Up
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "up",
+		Short: "up all or an application for staging",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.Up(args)
+		},
+	})
+
 	// Proxy
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "proxy",

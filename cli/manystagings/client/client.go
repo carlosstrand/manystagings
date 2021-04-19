@@ -153,3 +153,28 @@ func (c *Client) GetEnvironmentApplications(ctx context.Context, envID string) (
 	json.NewDecoder(res.Body).Decode(&appList)
 	return &appList, nil
 }
+
+func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
+	reqMap := map[string]interface{}{
+		"apps": apps,
+	}
+	reqJson, err := json.Marshal(reqMap)
+	if err != nil {
+		return err
+	}
+	path := c.withBaseURL("/api/environments/" + envID + "/apply-deployment")
+	req, err := http.NewRequest("POST", path, bytes.NewReader(reqJson))
+	if c.authToken != "" {
+		req.Header.Add("Authorization", "Bearer "+c.authToken)
+	}
+	res, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode > 299 {
+		errMap := map[string]string{}
+		json.NewDecoder(res.Body).Decode(&errMap)
+		return fmt.Errorf(errMap["error"])
+	}
+	return nil
+}

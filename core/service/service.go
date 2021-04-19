@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/carlosstrand/manystagings/consts"
 	"github.com/carlosstrand/manystagings/core/orchestrator"
@@ -62,20 +64,45 @@ func (s *Service) GetInfo() *Info {
 	return info
 }
 
-func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment) error {
+func appsContainsName(apps []models.Application, name string) bool {
+	for _, a := range apps {
+		if a.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment, appNames []string) error {
 	var apps []models.Application
-	s.linker.RepositoryDecoder("Application").Find(ctx, &filter.Filter{
-		Where: &map[string]interface{}{
-			"environment_id": map[string]interface{}{
-				"eq": environment.ID,
-			},
+	where := map[string]interface{}{
+		"environment_id": map[string]interface{}{
+			"eq": environment.ID,
 		},
+	}
+	if len(appNames) > 0 {
+		where["name"] = map[string]interface{}{
+			"in": appNames,
+		}
+	}
+	s.linker.RepositoryDecoder("Application").Find(ctx, &filter.Filter{
+		Where: &where,
 		Include: []include.Include{
 			{
 				Relation: "ApplicationEnvVars",
 			},
 		},
 	}, &apps)
+
+	if len(appNames) > 0 && len(appNames) != len(apps) {
+		notFoundApps := make([]string, 0)
+		for _, appName := range appNames {
+			if !appsContainsName(apps, appName) {
+				notFoundApps = append(notFoundApps, appName)
+			}
+		}
+		return fmt.Errorf("apps not found: %s", strings.Join(notFoundApps, ", "))
+	}
 
 	err := s.orchestrator.CreateNamespace(ctx, environment.Namespace)
 	if err != nil {
