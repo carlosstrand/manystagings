@@ -162,3 +162,14 @@ func TestApplyDeployment_Single_App(t *testing.T) {
 	err := app.Service.EnvironmentApplyDeployment(context.Background(), environment, []string{"node-api"})
 	assert.NoError(t, err)
 }
+
+func TestApplyDeployment_Apps_NotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	m := orchestratormock.NewMockOrchestrator(ctrl)
+
+	app := NewTestApp(m)
+
+	environment := getEnvironmentByNamespace(t, app, "qa")
+	err := app.Service.EnvironmentApplyDeployment(context.Background(), environment, []string{"node-api", "not-found-1", "not-found-2"})
+	assert.Error(t, err, "apps not found: not-found-1, not-found-2")
+}
