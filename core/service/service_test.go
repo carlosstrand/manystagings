@@ -88,7 +88,7 @@ func TestGetInfo(t *testing.T) {
 	}, info)
 }
 
-func TestApplyDeployment(t *testing.T) {
+func TestApplyDeployment_All(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := orchestratormock.NewMockOrchestrator(ctrl)
 
@@ -129,6 +129,36 @@ func TestApplyDeployment(t *testing.T) {
 	app := NewTestApp(m)
 
 	environment := getEnvironmentByNamespace(t, app, "qa")
-	err := app.Service.EnvironmentApplyDeployment(context.Background(), environment)
+	err := app.Service.EnvironmentApplyDeployment(context.Background(), environment, []string{})
+	assert.NoError(t, err)
+}
+
+func TestApplyDeployment_Single_App(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	m := orchestratormock.NewMockOrchestrator(ctrl)
+
+	m.EXPECT().
+		CreateNamespace(gomock.Any(), "qa").
+		Return(nil)
+
+	m.EXPECT().
+		CreateDeployment(gomock.Any(), &orchestrator.Deployment{
+			Name:      "node-api",
+			Namespace: "qa",
+			DockerImage: orchestrator.DeploymentDockerImage{
+				Name: "dockercloud/hello-world",
+				Tag:  "latest",
+			},
+			Env: map[string]string{
+				"NODE_ENV": "development",
+				"SITE_URL": "http://staging.mysite.com",
+			},
+		}).
+		Return(nil)
+
+	app := NewTestApp(m)
+
+	environment := getEnvironmentByNamespace(t, app, "qa")
+	err := app.Service.EnvironmentApplyDeployment(context.Background(), environment, []string{"node-api"})
 	assert.NoError(t, err)
 }
