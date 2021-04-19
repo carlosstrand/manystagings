@@ -2,25 +2,30 @@ package app
 
 import (
 	"github.com/carlosstrand/manystagings/consts"
+	"github.com/carlosstrand/manystagings/core/orchestrator"
+	"github.com/carlosstrand/manystagings/core/orchestrator/providers/kubernetes"
 	"github.com/carlosstrand/manystagings/core/service"
 	"github.com/go-zepto/zepto"
 	"github.com/go-zepto/zepto/plugins/linker"
 	"github.com/go-zepto/zepto/web"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 type App struct {
-	DB        *gorm.DB
-	Zepto     *zepto.Zepto
-	Linker    *linker.Linker
-	Service   *service.Service
-	apiRouter *web.Router
+	DB           *gorm.DB
+	Orchestrator orchestrator.Orchestrator
+	Zepto        *zepto.Zepto
+	Linker       *linker.Linker
+	Service      *service.Service
+	apiRouter    *web.Router
 }
 
 type Options struct {
-	DB     *gorm.DB
-	Logger *log.Logger
+	DB           *gorm.DB
+	Orchestrator orchestrator.Orchestrator
+	Logger       *log.Logger
 }
 
 func NewApp(opts Options) *App {
@@ -39,14 +44,20 @@ func NewApp(opts Options) *App {
 	if opts.Logger != nil {
 		zopts = append(zopts, zepto.Logger(opts.Logger))
 	}
+	if opts.Orchestrator == nil {
+		opts.Orchestrator = kubernetes.NewKubernetesProvider(kubernetes.Options{
+			LogLevel: logrus.DebugLevel,
+		})
+	}
 	zapp := zepto.NewZepto(
 		zopts...,
 	)
 	apiRouter := zapp.Router("/api")
 	return &App{
-		Zepto:     zapp,
-		DB:        opts.DB,
-		apiRouter: apiRouter,
+		Zepto:        zapp,
+		DB:           opts.DB,
+		Orchestrator: opts.Orchestrator,
+		apiRouter:    apiRouter,
 	}
 }
 

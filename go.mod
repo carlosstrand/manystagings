@@ -7,15 +7,18 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/go-zepto/zepto v1.0.0-beta.4
+	github.com/golang/mock v1.5.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/gophercloud/gophercloud v0.1.0 // indirect
 	github.com/gosimple/slug v1.9.0 // indirect
 	github.com/manifoldco/promptui v0.8.0 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
 	gorm.io/driver/mysql v1.0.5
+	gorm.io/driver/sqlite v1.1.4 // indirect
 	gorm.io/gorm v1.21.7
 	k8s.io/api v0.21.0 // indirect
 	k8s.io/apimachinery v0.21.0 // indirect

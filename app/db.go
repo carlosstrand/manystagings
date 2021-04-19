@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func AutoMigrateDB(db *gorm.DB) {
-	db.AutoMigrate(
+func AutoMigrateDB(db *gorm.DB) error {
+	return db.AutoMigrate(
 		&models.Environment{},
 		&models.Application{},
 		&models.ApplicationEnvVar{},

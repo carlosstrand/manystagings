@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -56,6 +57,7 @@ func NewKubernetesProvider(opts Options) *Kubernetes {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(configYaml)
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(configYaml))
 	if err != nil {
 		panic(err)
