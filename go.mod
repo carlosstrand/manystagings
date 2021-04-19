@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
+	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-zepto/zepto v1.0.0-beta.4
 	github.com/golang/mock v1.5.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
@@ -13,6 +14,7 @@ require (
 	github.com/gosimple/slug v1.9.0 // indirect
 	github.com/manifoldco/promptui v0.8.0 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect

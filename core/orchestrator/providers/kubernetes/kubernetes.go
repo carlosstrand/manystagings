@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/carlosstrand/manystagings/core/orchestrator"
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -30,6 +31,11 @@ type Kubernetes struct {
 
 type Options struct {
 	LogLevel logrus.Level
+}
+
+type NamespaceResourceMap struct {
+	Pods     map[string]v1.Pod
+	Services map[string]v1.Service
 }
 
 func loadConfigYaml() (string, error) {
@@ -57,7 +63,6 @@ func NewKubernetesProvider(opts Options) *Kubernetes {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(configYaml)
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(configYaml))
 	if err != nil {
 		panic(err)
@@ -203,9 +208,8 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 							Image: deployment.DockerImage.ToString(),
 							Ports: []apiv1.ContainerPort{
 								{
-									Name:     "http",
-									Protocol: apiv1.ProtocolTCP,
-									// TODO: Use real container Port
+									Name:          "http",
+									Protocol:      apiv1.ProtocolTCP,
 									ContainerPort: 80,
 								},
 							},
@@ -236,4 +240,78 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 func (k *Kubernetes) DeleteDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
 	deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
 	return deploymentsClient.Delete(ctx, deployment.Name, metav1.DeleteOptions{})
+}
+
+func statusPhaseToOrchestratorStatus(phase string) string {
+	p := strings.ToUpper(phase)
+	switch p {
+	case "PENDING", "RUNNING", "FAILED":
+		return p
+	}
+	return "UNKNOWN"
+}
+
+func (k *Kubernetes) getNamespaceResourcesMap(namespace string) (*NamespaceResourceMap, error) {
+	rm := NamespaceResourceMap{
+		Pods:     make(map[string]v1.Pod),
+		Services: make(map[string]v1.Service),
+	}
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, pod := range pods.Items {
+		rm.Pods[pod.ObjectMeta.Labels["run"]] = pod
+	}
+	services, err := k.clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range services.Items {
+		rm.Services[s.Name] = s
+	}
+	return &rm, nil
+}
+
+func envVarListTopMap(vars []v1.EnvVar) map[string]string {
+	varMap := make(map[string]string)
+	for _, v := range vars {
+		varMap[v.Name] = v.Value
+	}
+	return varMap
+}
+
+func deploymentFromResourceMap(rm *NamespaceResourceMap, appName string) *orchestrator.Deployment {
+	pod := rm.Pods[appName]
+	svc := rm.Services[appName]
+	if len(pod.Spec.Containers) == 0 || len(svc.Spec.Ports) == 0 {
+		return nil
+	}
+	svcPort := svc.Spec.Ports[0]
+	container := pod.Spec.Containers[0]
+	dockerImage := orchestrator.NewDeploymentDockerImageFromString(container.Image)
+	return &orchestrator.Deployment{
+		Name:          appName,
+		Namespace:     pod.Namespace,
+		DockerImage:   *dockerImage,
+		Port:          svcPort.Port,
+		ContainerPort: svcPort.TargetPort.IntVal,
+		Env:           envVarListTopMap(container.Env),
+	}
+}
+
+func (k *Kubernetes) DeploymentStatuses(ctx context.Context, namespace string) ([]orchestrator.DeploymentStatus, error) {
+	rm, err := k.getNamespaceResourcesMap(namespace)
+	if err != nil {
+		return nil, err
+	}
+	statuses := make([]orchestrator.DeploymentStatus, 0)
+	for appName := range rm.Services {
+		status := orchestrator.DeploymentStatus{
+			Status:     statusPhaseToOrchestratorStatus(string(rm.Pods[appName].Status.Phase)),
+			Deployment: deploymentFromResourceMap(rm, appName),
+		}
+		statuses = append(statuses, status)
+	}
+	return statuses, nil
 }

@@ -14,8 +14,10 @@ func (a *Actions) ProxyDeployment(appName string) error {
 	for _, app := range appList.Data {
 		if app.Name == appName {
 			a.orchestratorCLI.ProxyDeployment(context.TODO(), &orchestrator.Deployment{
-				Name:      app.Name,
-				Namespace: app.Environment.Namespace,
+				Name:          app.Name,
+				Namespace:     app.Environment.Namespace,
+				Port:          app.Port,
+				ContainerPort: app.ContainerPort,
 			})
 		}
 	}

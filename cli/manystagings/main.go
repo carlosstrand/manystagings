@@ -94,6 +94,17 @@ func main() {
 		},
 	})
 
+	// Status
+	rootCmd.AddCommand(&cobra.Command{
+		Use:     "status",
+		Aliases: []string{"ps"},
+		Short:   "get application statuses inside your staging",
+		Example: "manystagings status",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.Status()
+		},
+	})
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

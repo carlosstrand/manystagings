@@ -39,6 +39,11 @@ type Info struct {
 	OrchestratorSettings map[string]interface{} `json:"orchestrator_settings"`
 }
 
+type AppStatus struct {
+	Application *models.Application `json:"application"`
+	Status      string              `json:"status"`
+}
+
 func NewService(opts Options) *Service {
 	return &Service{
 		db:           opts.DB,
@@ -124,4 +129,36 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 	}
 
 	return nil
+}
+
+func statusFromAppName(statuses []orchestrator.DeploymentStatus, appName string) string {
+	for _, ds := range statuses {
+		if ds.Deployment != nil && ds.Deployment.Name == appName {
+			return ds.Status
+		}
+	}
+	return "NOT RUNNING"
+}
+
+func (s *Service) EnvironmentAppStatuses(ctx context.Context, environment *models.Environment) ([]AppStatus, error) {
+	var apps []*models.Application
+	s.linker.RepositoryDecoder("Application").Find(ctx, &filter.Filter{
+		Where: &map[string]interface{}{
+			"environment_id": map[string]interface{}{
+				"eq": environment.ID,
+			},
+		},
+	}, &apps)
+	statuses, err := s.orchestrator.DeploymentStatuses(ctx, environment.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	appStatuses := make([]AppStatus, 0)
+	for _, app := range apps {
+		appStatuses = append(appStatuses, AppStatus{
+			Application: app,
+			Status:      statusFromAppName(statuses, app.Name),
+		})
+	}
+	return appStatuses, nil
 }

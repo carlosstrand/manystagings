@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 type DeploymentDockerImage struct {
@@ -19,6 +20,19 @@ func (i *DeploymentDockerImage) ToString() string {
 		tag = "latest"
 	}
 	return fmt.Sprintf("%s:%s", i.Name, tag)
+}
+
+func NewDeploymentDockerImageFromString(image string) *DeploymentDockerImage {
+	parts := strings.Split(image, ":")
+	name := parts[0]
+	tag := parts[1]
+	if tag == "" {
+		tag = "latest"
+	}
+	return &DeploymentDockerImage{
+		Name: name,
+		Tag:  tag,
+	}
 }
 
 type Deployment struct {
@@ -44,6 +58,14 @@ type Deployment struct {
 	Env map[string]string
 }
 
+type DeploymentStatus struct {
+	// Deployment related to status
+	Deployment *Deployment `json:"deployment"`
+
+	// Status. Possible values: PENDING, RUNNING, FAILED, UNKNOWN
+	Status string `json:"status"`
+}
+
 type Orchestrator interface {
 	// Provider name (e.g. kubernetes)
 	Provider() string
@@ -59,4 +81,7 @@ type Orchestrator interface {
 
 	// Delete a deployment
 	DeleteDeployment(ctx context.Context, deployment *Deployment) error
+
+	// Retrieve a list of deployment and their status
+	DeploymentStatuses(ctx context.Context, namespace string) ([]DeploymentStatus, error)
 }

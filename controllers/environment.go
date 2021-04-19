@@ -27,3 +27,16 @@ func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 	}
 	return renderAccepted(ctx)
 }
+
+func (c *Controllers) EnvironmentAppStatuses(ctx web.Context) error {
+	envID := ctx.Params()["id"]
+	var env *models.Environment
+	if err := c.linker.RepositoryDecoder("Environment").FindById(ctx, envID, &env); err != nil {
+		return renderError(ctx, err, 400)
+	}
+	statuses, err := c.svc.EnvironmentAppStatuses(ctx, env)
+	if err != nil {
+		return renderError(ctx, err, 400)
+	}
+	return json.NewEncoder(ctx.Response()).Encode(statuses)
+}

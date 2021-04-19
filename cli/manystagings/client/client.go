@@ -178,3 +178,21 @@ func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, a
 	}
 	return nil
 }
+
+func (c *Client) GetEnvironmentStatus(ctx context.Context, envID string) ([]service.AppStatus, error) {
+	path := c.withBaseURL("/api/environments/" + envID + "/status")
+	req, err := http.NewRequest("GET", path, nil)
+	if c.authToken != "" {
+		req.Header.Add("Authorization", "Bearer "+c.authToken)
+	}
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	statuses := []service.AppStatus{}
+	err = json.NewDecoder(res.Body).Decode(&statuses)
+	if err != nil {
+		return nil, err
+	}
+	return statuses, err
+}
