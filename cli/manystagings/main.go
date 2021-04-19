@@ -1,8 +1,8 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/carlosstrand/manystagings/cli/manystagings/actions"
@@ -10,7 +10,7 @@ import (
 	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli"
 	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli/providerscli/kubernetescli"
 	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
-	"github.com/urfave/cli"
+	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -33,39 +33,57 @@ func main() {
 		Client:          client,
 		Config:          config,
 	})
-	app := &cli.App{
-		Name:  "configure",
-		Usage: "configure the manystagins CLI",
-		Commands: []cli.Command{
-			{
-				Name:    "configure",
-				Aliases: []string{"c"},
-				Usage:   "configure the manystagins CLI",
-				Action: func(c *cli.Context) error {
-					return a.Configure()
-				},
-			},
-			{
-				Name:    "proxy",
-				Aliases: []string{"p"},
-				Usage:   "Proxy to an application inside your staging",
-				Action: func(c *cli.Context) error {
-					return a.ProxyDeployment(c)
-				},
-			},
-			{
-				Name:    "exec",
-				Aliases: []string{"e"},
-				Usage:   "Exec a command into an application container",
-				Action: func(c *cli.Context) error {
-					return a.ExecDeployment(c)
-				},
-			},
+
+	var rootCmd = &cobra.Command{
+		Use:   "manystagings",
+		Short: "Setup your staging environment easily with manystagings",
+		Long:  `A Fast and Flexible staging manager Site Generator built in Go.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Do Stuff Here
 		},
 	}
 
-	err = app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
+	// Configure
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "configure",
+		Short: "configure the manystagins CLI",
+		Run: func(cmd *cobra.Command, args []string) {
+			a.Configure()
+		},
+	})
+
+	// Proxy
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "proxy",
+		Short: "proxy to an application inside your staging",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("application name required")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.ProxyDeployment(args[0])
+		},
+	})
+
+	// Exec
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "exec",
+		Short: "execute a command into an application container",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("application name required")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.ExecDeployment(args[0])
+		},
+	})
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
