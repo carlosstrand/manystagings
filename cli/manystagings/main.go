@@ -37,7 +37,7 @@ func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "manystagings",
 		Short: "Setup your staging environment easily with manystagings",
-		Long:  `A Fast and Flexible staging manager Site Generator built in Go.`,
+		Long:  `A Fast and Flexible staging manager built in Go.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Do Stuff Here
 		},
