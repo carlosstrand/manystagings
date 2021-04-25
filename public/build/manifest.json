@@ -1,0 +1,6 @@
+{
+  "vendor.js": "http://localhost:3808/public/build/vendor.js",
+  "vendor.js.map": "http://localhost:3808/public/build/vendor.js.map",
+  "webapp.js": "http://localhost:3808/public/build/webapp.js",
+  "webapp.js.map": "http://localhost:3808/public/build/webapp.js.map"
+}

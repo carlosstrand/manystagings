@@ -1,0 +1,5 @@
+{
+  "webapp": [
+    "webapp/index.tsx"
+  ]
+}

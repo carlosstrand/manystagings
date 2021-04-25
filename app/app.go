@@ -69,6 +69,7 @@ func (app *App) Init() {
 	app.setupService()
 	app.setupControllers()
 	app.bootstrap()
+	app.setupWebapp()
 	app.Zepto.SetupHTTP("0.0.0.0:8000")
 }
 
