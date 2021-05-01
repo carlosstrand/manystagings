@@ -4,9 +4,25 @@ import (
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/go-zepto/zepto/utils"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
+
+func createDbDialector() gorm.Dialector {
+	dbType := utils.GetEnv("DB_TYPE", "sqlite")
+	dbURI := utils.GetEnv("DB_URI", "file::memory:?cache=shared")
+	switch dbType {
+	case "sqlite":
+		return sqlite.Open(dbURI)
+	case "postgres":
+		return postgres.Open(dbURI)
+	case "mysql":
+		return mysql.Open(dbURI)
+	}
+	panic("unknown database type: " + dbType)
+}
 
 func AutoMigrateDB(db *gorm.DB) error {
 	return db.AutoMigrate(
@@ -18,8 +34,7 @@ func AutoMigrateDB(db *gorm.DB) error {
 }
 
 func CreateDB() (*gorm.DB, error) {
-	dbURI := utils.GetEnv("DB_URI", "root:root@/manystagings?charset=utf8&parseTime=True&loc=Local")
-	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{
+	db, err := gorm.Open(createDbDialector(), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {

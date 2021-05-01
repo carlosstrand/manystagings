@@ -2,3 +2,5 @@
 playground
 tmp
 node_modules
+build
+public/build/*
