@@ -11,6 +11,7 @@ import SelectEnvironmentPage from './pages/SelectEnvironment';
 import React from 'react';
 import ApplicationsPage from './pages/Applications';
 import ApplicationPage from './pages/Application';
+import SettingsPage from './pages/Settings';
 
 // Styled Components Global
 const GlobalStyle = createGlobalStyle`
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/select-environment" component={SelectEnvironmentPage} />
             <Route path="/environments/:envId/applications/:appId" component={ApplicationPage} />
             <Route path="/environments/:envId/applications" component={ApplicationsPage} />
+            <Route path="/environments/:envId/settings" component={SettingsPage} />
           </Switch>
         </Router>
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}

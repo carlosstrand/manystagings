@@ -9,6 +9,7 @@ export const Wrapper = styled.div`
 `;
 
 export const Dialogue = styled(Box)`
+  min-width: 320px;
   max-width: 480px;
 `;
 

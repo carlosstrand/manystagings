@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Environment from '../../types/environment';
 import { Link } from 'react-router-dom';
 import {
@@ -14,10 +14,12 @@ import {
   AddListItemText,
   EnvIcon,
 } from './style';
+import CreateEditEnvironmentModal from '../CreateEditEnvironmentModal';
 
 
 interface SelectEnvironmentProps {
   environments: Environment[];
+  refetch: () => void;
 }
 
 interface SelectEnvironmentListItemProps {
@@ -25,7 +27,7 @@ interface SelectEnvironmentListItemProps {
 }
 
 const SelectEnvironmentListItem = ({ env }: SelectEnvironmentListItemProps) => {
-  const EnvLink = (props: any) => <Link to={`/environments/${env.id}`} {...props} />;
+  const EnvLink = (props: any) => <Link to={`/environments/${env.id}/applications`} {...props} />;
   return (
     <ListItem key={env.id} button component={EnvLink}>
       <ListItemAvatar>
@@ -36,21 +38,31 @@ const SelectEnvironmentListItem = ({ env }: SelectEnvironmentListItemProps) => {
       <ListItemText>{env.name}</ListItemText>
     </ListItem>
   );
-}
+};
 
 const SelectEnvironment = (props: SelectEnvironmentProps) => {
+  const { refetch } = props;
+  const [showCreateEnvModal, setShowCreateModal] = useState(false);
   return (
-    <List>
-      {props.environments.map((env) => <SelectEnvironmentListItem key={env.id} env={env} />)}
-      <AddListItem button>
-        <ListItemAvatar>
-          <AddAvatar>
-            <AddIcon />
-          </AddAvatar>
-        </ListItemAvatar>
-        <AddListItemText>Create Environment</AddListItemText>
-      </AddListItem>
-    </List>
+    <>
+      <CreateEditEnvironmentModal
+        id={null}
+        open={showCreateEnvModal}
+        onClose={() => setShowCreateModal(false)}
+        refetch={refetch}
+      />
+      <List>
+        {props.environments.map((env) => <SelectEnvironmentListItem key={env.id} env={env} />)}
+        <AddListItem button onClick={() => setShowCreateModal(true)}>
+          <ListItemAvatar>
+            <AddAvatar>
+              <AddIcon />
+            </AddAvatar>
+          </ListItemAvatar>
+          <AddListItemText>Create Environment</AddListItemText>
+        </AddListItem>
+      </List>
+    </>
   );
 };
 

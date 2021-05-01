@@ -5,8 +5,11 @@ import Application from '../types/application';
 
 const useApplication = (appId: string) =>
   useQuery<Application, AxiosError>(
-    'fetchApplication',
+    ['fetchApplication', appId],
     async () => (await client.get(`/api/applications/${appId}`)).data,
+    {
+      enabled: !!appId,
+    }
   );
 
 export default useApplication;

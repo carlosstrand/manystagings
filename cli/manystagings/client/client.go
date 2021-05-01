@@ -182,6 +182,7 @@ func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, a
 func (c *Client) GetEnvironmentStatus(ctx context.Context, envID string) ([]service.AppStatus, error) {
 	path := c.withBaseURL("/api/environments/" + envID + "/status")
 	req, err := http.NewRequest("GET", path, nil)
+	req.Header.Add("Content-Type", "application/json")
 	if c.authToken != "" {
 		req.Header.Add("Authorization", "Bearer "+c.authToken)
 	}

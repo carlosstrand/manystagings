@@ -1,22 +1,20 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar';
+import styled from 'styled-components';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import MailIcon from '@material-ui/icons/Mail';
-import MenuIcon from '@material-ui/icons/Menu';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
-import { Settings, Speed, Web } from '@material-ui/icons';
-import Box from '../../ui/Box';
+import { Repeat, Settings, Speed, Web } from '@material-ui/icons';
+import { Link, useParams } from 'react-router-dom';
+import useEnvironment from '../../hooks/useEnvironment';
+import Layers from '@material-ui/icons/Layers';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
 
 const drawerWidth = 240;
 
@@ -30,6 +28,7 @@ const useStyles = makeStyles((theme: Theme) =>
         width: drawerWidth,
         flexShrink: 0,
       },
+      backgroundColor: '#0C2461',
     },
     appBar: {
       [theme.breakpoints.up('sm')]: {
@@ -47,6 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
     toolbar: theme.mixins.toolbar,
     drawerPaper: {
       width: drawerWidth,
+      backgroundColor: "#0C2461"
     },
     content: {
       flexGrow: 1,
@@ -64,27 +64,58 @@ export default function EnvironmentLayout(props: EnvironmentLayoutProps) {
   const classes = useStyles();
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { envId } = useParams();
+  const { data: environment } = useEnvironment(envId);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const StyledListItemIcon = styled(ListItemIcon)`
+    color: white;
+  `;
+  const StyledListItemText = styled(ListItemText)`
+    color: white;
+  `;
+
+  const Logo = styled.img`
+    margin: 24px;
+    height: 20px;
+  `;
+
+  const envLink = (path) => `/environments/${envId}${path}`;
+
+  console.log(environment);
   const drawer = (
     <div>
-      <div className={classes.toolbar} />
+      <div className={classes.toolbar}>
+        <Logo src="/public/img/logo-dark.svg" />
+      </div>
+      <Divider />
+      <List style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)'}}>
+        <ListItem>
+          <StyledListItemText primary={environment?.name} />
+          <ListItemSecondaryAction>
+            <IconButton component={Link} to="/select-environment">
+              <Repeat style={{ color: '#fff' }} />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </List>
       <Divider />
       <List>
-        <ListItem button>
-          <ListItemIcon><Web /></ListItemIcon>
-          <ListItemText>Applications</ListItemText>
+        <ListItem button component={Link} to={envLink('/applications')}>
+          <StyledListItemIcon><Web /></StyledListItemIcon>
+          <StyledListItemText>Applications</StyledListItemText>
         </ListItem>
-        <ListItem button>
-          <ListItemIcon><Speed /></ListItemIcon>
-          <ListItemText>Status</ListItemText>
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon><Settings /></ListItemIcon>
-          <ListItemText>Settings</ListItemText>
+        {/* TODO: Add status page */}
+        {/* <ListItem button>
+          <StyledListItemIcon><Speed /></StyledListItemIcon>
+          <StyledListItemText>Status</StyledListItemText>
+        </ListItem> */}
+        <ListItem button component={Link} to={envLink('/settings')}>
+          <StyledListItemIcon><Settings /></StyledListItemIcon>
+          <StyledListItemText>Settings</StyledListItemText>
         </ListItem>
       </List>
     </div>
@@ -103,8 +134,9 @@ export default function EnvironmentLayout(props: EnvironmentLayoutProps) {
               paper: classes.drawerPaper,
             }}
             ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
+              keepMounted: true,
             }}
+            style={{ backgroundColor: "#0C2461" }}
           >
             {drawer}
           </Drawer>
@@ -116,6 +148,7 @@ export default function EnvironmentLayout(props: EnvironmentLayoutProps) {
             }}
             variant="permanent"
             open
+            style={{ backgroundColor: "#0C2461" }}
           >
             {drawer}
           </Drawer>
