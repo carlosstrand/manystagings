@@ -55,7 +55,6 @@ func errStatusFromRes(res *http.Response) error {
 
 func (c *Client) Auth(ctx context.Context, username string, password string) (*authcore.Token, error) {
 	path := c.withBaseURL("/auth")
-	fmt.Println(path)
 	credentials := authcore.AuthCredentials{
 		Username: username,
 		Password: password,
@@ -68,6 +67,7 @@ func (c *Client) Auth(ctx context.Context, username string, password string) (*a
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return nil, errStatusFromRes(res)
 	}
@@ -92,6 +92,7 @@ func (c *Client) GetInfo(ctx context.Context) (*service.Info, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return nil, errStatusFromRes(res)
 	}
@@ -110,10 +111,14 @@ func (c *Client) GetEnvironments(ctx context.Context) (*EnvironmentList, error) 
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return nil, errStatusFromRes(res)
 	}
-	json.NewDecoder(res.Body).Decode(&envList)
+	err = json.NewDecoder(res.Body).Decode(&envList)
+	if err != nil {
+		return nil, err
+	}
 	return &envList, nil
 }
 
@@ -147,6 +152,7 @@ func (c *Client) GetEnvironmentApplications(ctx context.Context, envID string) (
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		return nil, errStatusFromRes(res)
 	}
@@ -171,6 +177,7 @@ func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, a
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		errMap := map[string]string{}
 		json.NewDecoder(res.Body).Decode(&errMap)
@@ -190,6 +197,7 @@ func (c *Client) GetEnvironmentStatus(ctx context.Context, envID string) ([]serv
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 	statuses := []service.AppStatus{}
 	err = json.NewDecoder(res.Body).Decode(&statuses)
 	if err != nil {

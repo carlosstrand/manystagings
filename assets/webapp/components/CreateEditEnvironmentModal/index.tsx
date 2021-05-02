@@ -6,6 +6,7 @@ import useEnvironment from '../../hooks/useEnvironment';
 import Button from '../../ui/Button';
 import Input from '../../ui/Input';
 import Modal from '../../ui/Modal';
+import safeName from '../../utils/safeName';
 
 interface CreateEditEnvironmentModalProps  {
   id: string | null;
@@ -21,14 +22,17 @@ const CreateEditEnvironmentModal = (props: CreateEditEnvironmentModalProps) => {
   const editEnv = useEditEnvironment({});
   const createEnv = useCreateEnvironment({});
   const [name, setName] = useState('');
+  const [namespace, setNamespace] = useState('');
   useEffect(() => {
     setName(environment.data?.name || '');
+    setNamespace(environment.data?.namespace || '');
   }, [environment.data]);
   const onSubmit = () => {
     if (isEdit) {
       editEnv.mutateAsync({
         id,
-        name: name,
+        name,
+        namespace,
       }).then(() => {
         environment.refetch();
         onClose({}, 'escapeKeyDown');
@@ -36,6 +40,7 @@ const CreateEditEnvironmentModal = (props: CreateEditEnvironmentModalProps) => {
     } else {
       createEnv.mutateAsync({
         name: name,
+        namespace,
       }).then(() => {
         props.refetch();
         onClose({}, 'escapeKeyDown');
@@ -51,12 +56,34 @@ const CreateEditEnvironmentModal = (props: CreateEditEnvironmentModalProps) => {
       footer={(
         <div style={{ textAlign: 'right' }}>
           <Button onClick={() => onClose({}, 'escapeKeyDown')}>Cancel</Button>
-          <Button color="primary" onClick={() => onSubmit()}>Save</Button>
+          <Button
+            color="primary"
+            onClick={() => onSubmit()}
+            disabled={name === "" || namespace === ""}
+          >
+            Save
+          </Button>
         </div>
       )}
     >
       <div>
-        <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+        <Input
+          label="Name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            setNamespace(safeName(e.target.value));
+          }}
+          fullWidth
+        />
+        <Input
+          label="Namespace"
+          value={namespace}
+          onChange={(e) => {
+            setNamespace(safeName(e.target.value));
+          }}
+          fullWidth
+        />
       </div>
     </Modal>
   )

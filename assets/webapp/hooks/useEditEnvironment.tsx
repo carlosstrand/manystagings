@@ -5,6 +5,7 @@ import Environment from '../types/environment';
 
 interface EditEnvironmentPayload {
   name: string;
+  namespace: string;
 };
 
 const useEditEnvironment = (opts: UseMutationOptions<EditEnvironmentPayload, AxiosError, Environment>) =>

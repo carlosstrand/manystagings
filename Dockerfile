@@ -1,7 +1,7 @@
 FROM golang:1.16.3-alpine3.13
 WORKDIR /app
 COPY . .
-RUN apk update && apk add --update make npm && npm install && make build
+RUN apk update && apk add --update make build-base npm && npm install && make build
 
 FROM alpine:3.11
 WORKDIR /app

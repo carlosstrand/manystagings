@@ -37,6 +37,7 @@
     "react-query": "^3.13.12",
     "react-router-dom": "^5.2.0",
     "sass-loader": "^8.0.2",
+    "slugify": "^1.5.0",
     "style-loader": "^1.0.0",
     "styled-components": "^5.2.3",
     "url-loader": "^2.3.0",

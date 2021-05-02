@@ -1,7 +1,7 @@
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import MuiCssBaseline from '@material-ui/core/CssBaseline';
 import { createGlobalStyle } from 'styled-components';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
@@ -47,6 +47,8 @@ const App = () => (
             <Route path="/environments/:envId/applications/:appId" component={ApplicationPage} />
             <Route path="/environments/:envId/applications" component={ApplicationsPage} />
             <Route path="/environments/:envId/settings" component={SettingsPage} />
+            <Route path="/" component={LoginPage} />
+            <Redirect to="/login" />
           </Switch>
         </Router>
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}

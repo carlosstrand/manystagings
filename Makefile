@@ -21,3 +21,7 @@ build:
 	rm -rf build && mkdir build && \
 	go build -o build/app-service *.go &&\
 	cp -r templates public ./build
+
+.PHONY docker:build
+docker\:build:
+	docker build . -t carlosstrand/manystagings:latest
