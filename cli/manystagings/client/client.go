@@ -160,7 +160,7 @@ func (c *Client) GetEnvironmentApplications(ctx context.Context, envID string) (
 	return &appList, nil
 }
 
-func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
+func (c *Client) createEnvAppsEndpointRequest(ctx context.Context, envID string, apps []string, methodPath string) error {
 	reqMap := map[string]interface{}{
 		"apps": apps,
 	}
@@ -168,7 +168,7 @@ func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, a
 	if err != nil {
 		return err
 	}
-	path := c.withBaseURL("/api/environments/" + envID + "/apply-deployment")
+	path := c.withBaseURL("/api/environments/" + envID + methodPath)
 	req, err := http.NewRequest("POST", path, bytes.NewReader(reqJson))
 	if c.authToken != "" {
 		req.Header.Add("Authorization", "Bearer "+c.authToken)
@@ -184,6 +184,14 @@ func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, a
 		return fmt.Errorf(errMap["error"])
 	}
 	return nil
+}
+
+func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
+	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/apply-deployment")
+}
+
+func (c *Client) DeleteEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
+	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/delete-deployment")
 }
 
 func (c *Client) GetEnvironmentStatus(ctx context.Context, envID string) ([]service.AppStatus, error) {

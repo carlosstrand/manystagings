@@ -58,6 +58,15 @@ func main() {
 		},
 	})
 
+	// Kill
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "kill",
+		Short: "kill all or an application for staging",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.Kill(args)
+		},
+	})
+
 	// Proxy
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "proxy",

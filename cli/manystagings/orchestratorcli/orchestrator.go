@@ -9,5 +9,4 @@ import (
 type OrchestratorCLI interface {
 	ProxyDeployment(ctx context.Context, deployment *orchestrator.Deployment) error
 	ExecDeployment(ctx context.Context, deployment *orchestrator.Deployment, command []string) error
-	// ApplyEnvironmentDeployment(ctx context.Context, appNames []string) error
 }

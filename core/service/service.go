@@ -78,7 +78,7 @@ func appsContainsName(apps []models.Application, name string) bool {
 	return false
 }
 
-func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment, appNames []string) error {
+func (s *Service) getAppsFromEnvironmentAppNames(ctx context.Context, environment *models.Environment, appNames []string) ([]models.Application, error) {
 	var apps []models.Application
 	where := map[string]interface{}{
 		"environment_id": map[string]interface{}{
@@ -106,14 +106,20 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 				notFoundApps = append(notFoundApps, appName)
 			}
 		}
-		return fmt.Errorf("apps not found: %s", strings.Join(notFoundApps, ", "))
+		return nil, fmt.Errorf("apps not found: %s", strings.Join(notFoundApps, ", "))
 	}
+	return apps, nil
+}
 
-	err := s.orchestrator.CreateNamespace(ctx, environment.Namespace)
+func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment, appNames []string) error {
+	apps, err := s.getAppsFromEnvironmentAppNames(ctx, environment, appNames)
 	if err != nil {
 		return err
 	}
-
+	err = s.orchestrator.CreateNamespace(ctx, environment.Namespace)
+	if err != nil {
+		return err
+	}
 	for _, app := range apps {
 		s.orchestrator.CreateDeployment(ctx, &orchestrator.Deployment{
 			Name: app.Name,
@@ -127,7 +133,24 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 			Env:           appEnvVarsToMap(app.ApplicationEnvVars),
 		})
 	}
+	return nil
+}
 
+func (s *Service) EnvironmentDeleteDeployment(ctx context.Context, environment *models.Environment, appNames []string) error {
+	apps, err := s.getAppsFromEnvironmentAppNames(ctx, environment, appNames)
+	if err != nil {
+		return err
+	}
+	err = s.orchestrator.CreateNamespace(ctx, environment.Namespace)
+	if err != nil {
+		return err
+	}
+	for _, app := range apps {
+		s.orchestrator.DeleteDeployment(ctx, &orchestrator.Deployment{
+			Name:      app.Name,
+			Namespace: environment.Namespace,
+		})
+	}
 	return nil
 }
 

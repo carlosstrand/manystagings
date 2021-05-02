@@ -13,5 +13,6 @@ func (a *App) setupControllers() {
 	// Additional CLI routes
 	a.apiRouter.Get("/info", ctrls.Info)
 	a.apiRouter.Post("/environments/{id}/apply-deployment", ctrls.EnvironmentApplyDeployment)
+	a.apiRouter.Post("/environments/{id}/delete-deployment", ctrls.EnvironmentDeleteDeployment)
 	a.apiRouter.Get("/environments/{id}/status", ctrls.EnvironmentAppStatuses)
 }

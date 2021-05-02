@@ -11,6 +11,10 @@ type EnvironmentApplyDeploymentRequest struct {
 	Apps []string `json:"apps"`
 }
 
+type EnvironmentDeleteDeploymentRequest struct {
+	Apps []string `json:"apps"`
+}
+
 func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 	envID := ctx.Params()["id"]
 	var req EnvironmentApplyDeploymentRequest
@@ -23,6 +27,23 @@ func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 		return renderError(ctx, err, 400)
 	}
 	if err := c.svc.EnvironmentApplyDeployment(ctx, env, req.Apps); err != nil {
+		return renderError(ctx, err, 400)
+	}
+	return renderAccepted(ctx)
+}
+
+func (c *Controllers) EnvironmentDeleteDeployment(ctx web.Context) error {
+	envID := ctx.Params()["id"]
+	var req EnvironmentDeleteDeploymentRequest
+	err := json.NewDecoder(ctx.Request().Body).Decode(&req)
+	if err != nil {
+		renderError(ctx, err, 500)
+	}
+	var env *models.Environment
+	if err := c.linker.RepositoryDecoder("Environment").FindById(ctx, envID, &env); err != nil {
+		return renderError(ctx, err, 400)
+	}
+	if err := c.svc.EnvironmentDeleteDeployment(ctx, env, req.Apps); err != nil {
 		return renderError(ctx, err, 400)
 	}
 	return renderAccepted(ctx)
