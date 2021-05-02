@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ApplicationEnvVar struct {
 	Base
 	ApplicationID string       `json:"application_id"`
@@ -21,4 +23,5 @@ type Application struct {
 	ContainerPort      int32               `json:"container_port"`
 	PublicUrlEnabled   bool                `json:"public_url_enabled"`
 	PublicUrl          string              `json:"public_url"`
+	StartedAt          *time.Time          `json:"started_at"`
 }

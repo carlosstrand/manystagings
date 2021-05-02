@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/carlosstrand/manystagings/consts"
 	"github.com/carlosstrand/manystagings/core/orchestrator"
@@ -132,11 +133,11 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 			Namespace:     environment.Namespace,
 			Env:           appEnvVarsToMap(app.ApplicationEnvVars),
 		}
-		s.orchestrator.CreateDeployment(ctx, deployment, recreate)
-		fmt.Println(app.PublicUrlEnabled)
+		created, _ := s.orchestrator.CreateDeployment(ctx, deployment, recreate)
+		publicUrl := ""
 		if app.PublicUrlEnabled {
 			s.orchestrator.DeletePublicURL(ctx, deployment)
-			publicUrl, err := s.orchestrator.CreatePublicURL(ctx, deployment, orchestrator.PublicURLOptions{
+			publicUrl, err = s.orchestrator.CreatePublicURL(ctx, deployment, orchestrator.PublicURLOptions{
 				Host:      "ms.carlosstrand.com",
 				Subdomain: fmt.Sprintf("%s-%s", deployment.Namespace, deployment.Name),
 			})
@@ -144,14 +145,18 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 				// TODO: Use Logger here
 				fmt.Println(err)
 			}
-			err = s.linker.RepositoryDecoder("Application").UpdateById(ctx, app.ID, map[string]interface{}{
-				"public_url": publicUrl,
-			}, &app)
 			if err != nil {
 				// TODO: Use Logger here
 				fmt.Println(err)
 			}
 		}
+		appUpdateData := map[string]interface{}{
+			"public_url": publicUrl,
+		}
+		if created {
+			appUpdateData["started_at"] = time.Now()
+		}
+		err = s.linker.RepositoryDecoder("Application").UpdateById(ctx, app.ID, appUpdateData, &app)
 	}
 	return nil
 }

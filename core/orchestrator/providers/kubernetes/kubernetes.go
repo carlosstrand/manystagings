@@ -172,16 +172,16 @@ func envMapToK8sEnvVar(envMap map[string]string) []apiv1.EnvVar {
 	return vars
 }
 
-func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestrator.Deployment, recreate bool) error {
+func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestrator.Deployment, recreate bool) (bool, error) {
 	exists, err := k.checkDeploymentExists(ctx, deployment)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if exists && recreate {
 		k.logger.Debugf("deployment '%s' already exists. Deleting current deployment...", deployment.Name)
 		err := k.DeleteDeployment(ctx, deployment)
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
 	replicas := int32(1)
@@ -226,7 +226,7 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 		deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
 		_, err = deploymentsClient.Create(ctx, k8sDeployment, metav1.CreateOptions{})
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
 	exists, err = k.checkServiceExists(ctx, deployment)
@@ -234,42 +234,20 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 		k.logger.Debugf("Service '%s' already exists and recreate is enabled. Deleting current service...", deployment.Name)
 		err := k.deleteService(ctx, deployment)
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
 	if !exists || recreate {
 		k.logger.Debugf("Creating service '%s'...", deployment.Name)
-		return k.createService(ctx, deployment)
+		return true, k.createService(ctx, deployment)
 	}
-	return nil
+	return false, nil
 }
 
 func (k *Kubernetes) DeleteDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
 	deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
 	return deploymentsClient.Delete(ctx, deployment.Name, metav1.DeleteOptions{})
 }
-
-// apiVersion: networking.k8s.io/v1beta1
-// kind: Ingress
-// metadata:
-//   annotations:
-//     kubernetes.io/ingress.class: "nginx"
-//     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-//   name: manystagings
-// spec:
-//   rules:
-//     - host: ms.carlosstrand.com
-//       http:
-//         paths:
-//           - backend:
-//               serviceName: manystagings
-//               servicePort: 80
-//             path: /
-//   # This section is only required if TLS is to be enabled for the Ingress
-//   tls:
-//       - hosts:
-//           - ms.carlosstrand.com
-//         secretName: manystagings-tls-secret
 
 func (k *Kubernetes) CreatePublicURL(ctx context.Context, deployment *orchestrator.Deployment, opts orchestrator.PublicURLOptions) (string, error) {
 	host := fmt.Sprintf("%s.%s", opts.Subdomain, opts.Host)

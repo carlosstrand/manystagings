@@ -85,7 +85,7 @@ type Orchestrator interface {
 	CreateNamespace(ctx context.Context, namespace string) error
 
 	// Create a deployment
-	CreateDeployment(ctx context.Context, deployment *Deployment, recreate bool) error
+	CreateDeployment(ctx context.Context, deployment *Deployment, recreate bool) (created bool, err error)
 
 	// Create a public url
 	CreatePublicURL(ctx context.Context, deployment *Deployment, opts PublicURLOptions) (string, error)

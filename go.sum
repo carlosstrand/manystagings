@@ -195,8 +195,8 @@ github.com/go-webpack/pongo2 v1.0.0 h1:I3wSDsLcR8DtafpDq+AAuy6z4f1m6qum7gHYtU9wV
 github.com/go-webpack/pongo2 v1.0.0/go.mod h1:XozVI7HhuXKVyfRgh42NxMdvrI1D6vjCmz26aeEC1as=
 github.com/go-webpack/webpack v1.5.0 h1:No6zPXZk00JUlW5S1j3G6FqoWVy7PJ4zElnDIeWoypM=
 github.com/go-webpack/webpack v1.5.0/go.mod h1:wRQfNvPzxky/Y2JxiKRNrxYHc5+cQXGgpkTt4dPDK+A=
-github.com/go-zepto/zepto v1.0.0-beta.6 h1:7KNDdZwf8UW06nBejdDM5ykCraFqekFzVkTNOMrCbE8=
-github.com/go-zepto/zepto v1.0.0-beta.6/go.mod h1:oDUSIbRxBNq3+s/r/SlwrHpJTHuXzbjVizSZfXujXdE=
+github.com/go-zepto/zepto v1.0.0-beta.7 h1:j2+QvSAtysqmkab9YfHHFpQNStqJJ5wAQNta5EF3aFA=
+github.com/go-zepto/zepto v1.0.0-beta.7/go.mod h1:oDUSIbRxBNq3+s/r/SlwrHpJTHuXzbjVizSZfXujXdE=
 github.com/gobuffalo/here v0.6.0/go.mod h1:wAG085dHOYqUpf+Ap+WOdrPTp5IYcDAs/x7PLa8Y5fM=
 github.com/gofrs/uuid v3.2.0+incompatible h1:y12jRkkFxsd7GpqdSZ+/KCs/fJbqpEXSGd4+jfEaewE=
 github.com/gofrs/uuid v3.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=

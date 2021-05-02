@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/fatih/color v1.10.0
-	github.com/go-zepto/zepto v1.0.0-beta.6
+	github.com/go-zepto/zepto v1.0.0-beta.7
 	github.com/golang/mock v1.5.0
 	github.com/google/uuid v1.2.0
 	github.com/manifoldco/promptui v0.8.0

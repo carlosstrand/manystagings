@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
@@ -30,9 +31,13 @@ func (a *Actions) Status() error {
 		return err
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Application", "Status"})
+	table.SetHeader([]string{"Application", "Status", "Age", "Port", "Public URL"})
 	for _, s := range statuses {
-		table.Append([]string{s.Application.Name, coloredStatus(s.Status)})
+		age := ""
+		if s.Application.StartedAt != nil {
+			age = time.Since(*s.Application.StartedAt).Truncate(time.Millisecond).Round(time.Second).String()
+		}
+		table.Append([]string{s.Application.Name, coloredStatus(s.Status), age, fmt.Sprintf("%d", s.Application.Port), s.Application.PublicUrl})
 	}
 	table.Render()
 	return nil
