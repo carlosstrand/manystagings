@@ -121,7 +121,7 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 		return err
 	}
 	for _, app := range apps {
-		s.orchestrator.CreateDeployment(ctx, &orchestrator.Deployment{
+		deployment := &orchestrator.Deployment{
 			Name: app.Name,
 			DockerImage: orchestrator.DeploymentDockerImage{
 				Name: app.DockerImageName,
@@ -131,7 +131,27 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 			ContainerPort: app.ContainerPort,
 			Namespace:     environment.Namespace,
 			Env:           appEnvVarsToMap(app.ApplicationEnvVars),
-		}, recreate)
+		}
+		s.orchestrator.CreateDeployment(ctx, deployment, recreate)
+		fmt.Println(app.PublicUrlEnabled)
+		if app.PublicUrlEnabled {
+			s.orchestrator.DeletePublicURL(ctx, deployment)
+			publicUrl, err := s.orchestrator.CreatePublicURL(ctx, deployment, orchestrator.PublicURLOptions{
+				Host:      "ms.carlosstrand.com",
+				Subdomain: fmt.Sprintf("%s-%s", deployment.Namespace, deployment.Name),
+			})
+			if err != nil {
+				// TODO: Use Logger here
+				fmt.Println(err)
+			}
+			err = s.linker.RepositoryDecoder("Application").UpdateById(ctx, app.ID, map[string]interface{}{
+				"public_url": publicUrl,
+			}, &app)
+			if err != nil {
+				// TODO: Use Logger here
+				fmt.Println(err)
+			}
+		}
 	}
 	return nil
 }

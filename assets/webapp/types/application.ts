@@ -7,4 +7,6 @@ export default interface Application {
   shell_command?: string;
   port?: number;
   container_port?: number;
+  public_url_enabled?: boolean;
+  public_url?: string;
 }

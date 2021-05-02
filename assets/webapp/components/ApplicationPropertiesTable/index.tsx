@@ -30,7 +30,11 @@ export default function ApplicationPropertiesTable(props: ApplicationPropertiesT
           {rows.map((row) => (
             <TableRow key={row.key}>
               <TableCell align="left" width="300"><strong>{row.key}</strong></TableCell>
-              <TableCell align="left">{row.value}</TableCell>
+              <TableCell align="left">
+                {row.key === 'Public URL' ? (
+                  row.value == "" ? '-' : <a target="_blank" href={row.value}>{row.value}</a>
+                ) : row.value}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

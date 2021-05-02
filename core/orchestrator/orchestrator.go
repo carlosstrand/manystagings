@@ -66,6 +66,14 @@ type DeploymentStatus struct {
 	Status string `json:"status"`
 }
 
+type PublicURLOptions struct {
+	// Host of the URL (eg mysite.com)
+	Host string `json:"host"`
+
+	// Subdomain of the URL (eg. my-staging)
+	Subdomain string `json:"subdomain"`
+}
+
 type Orchestrator interface {
 	// Provider name (e.g. kubernetes)
 	Provider() string
@@ -78,6 +86,12 @@ type Orchestrator interface {
 
 	// Create a deployment
 	CreateDeployment(ctx context.Context, deployment *Deployment, recreate bool) error
+
+	// Create a public url
+	CreatePublicURL(ctx context.Context, deployment *Deployment, opts PublicURLOptions) (string, error)
+
+	// Delete a public url
+	DeletePublicURL(ctx context.Context, deployment *Deployment) error
 
 	// Delete a deployment
 	DeleteDeployment(ctx context.Context, deployment *Deployment) error

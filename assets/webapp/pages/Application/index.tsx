@@ -50,6 +50,10 @@ const ApplicationPage = () => {
     {
       key: "Container Port",
       value: data.container_port.toString(),
+    },
+    {
+      key: "Public URL",
+      value: data.public_url.toString(),
     }
   ];
   return (

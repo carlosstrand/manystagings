@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -14,6 +15,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -245,6 +247,79 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 func (k *Kubernetes) DeleteDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
 	deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
 	return deploymentsClient.Delete(ctx, deployment.Name, metav1.DeleteOptions{})
+}
+
+// apiVersion: networking.k8s.io/v1beta1
+// kind: Ingress
+// metadata:
+//   annotations:
+//     kubernetes.io/ingress.class: "nginx"
+//     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+//   name: manystagings
+// spec:
+//   rules:
+//     - host: ms.carlosstrand.com
+//       http:
+//         paths:
+//           - backend:
+//               serviceName: manystagings
+//               servicePort: 80
+//             path: /
+//   # This section is only required if TLS is to be enabled for the Ingress
+//   tls:
+//       - hosts:
+//           - ms.carlosstrand.com
+//         secretName: manystagings-tls-secret
+
+func (k *Kubernetes) CreatePublicURL(ctx context.Context, deployment *orchestrator.Deployment, opts orchestrator.PublicURLOptions) (string, error) {
+	host := fmt.Sprintf("%s.%s", opts.Subdomain, opts.Host)
+	k.logger.Debugf("Creating public url '%s' (host=%s)...", deployment.Name, host)
+	ingClient := k.clientset.ExtensionsV1beta1().Ingresses(deployment.Namespace)
+	_, err := ingClient.Create(ctx, &v1beta1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.Name,
+			Namespace: deployment.Namespace,
+			Annotations: map[string]string{
+				"kubernetes.io/ingress.class":    "nginx",
+				"cert-manager.io/cluster-issuer": "letsencrypt-prod",
+			},
+		},
+		Spec: v1beta1.IngressSpec{
+			Rules: []v1beta1.IngressRule{
+				{
+					Host: host,
+					IngressRuleValue: v1beta1.IngressRuleValue{
+						HTTP: &v1beta1.HTTPIngressRuleValue{
+							Paths: []v1beta1.HTTPIngressPath{
+								{
+									Path: "/",
+									Backend: v1beta1.IngressBackend{
+										ServiceName: deployment.Name,
+										ServicePort: intstr.IntOrString{IntVal: deployment.Port},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			TLS: []v1beta1.IngressTLS{
+				{
+					Hosts: []string{
+						host,
+					},
+					SecretName: fmt.Sprintf("%s-tls", deployment.Name),
+				},
+			},
+		},
+	}, metav1.CreateOptions{})
+	url := fmt.Sprintf("https://%s", host)
+	return url, err
+}
+
+func (k *Kubernetes) DeletePublicURL(ctx context.Context, deployment *orchestrator.Deployment) error {
+	ingClient := k.clientset.ExtensionsV1beta1().Ingresses(deployment.Namespace)
+	return ingClient.Delete(ctx, deployment.Name, metav1.DeleteOptions{})
 }
 
 func statusPhaseToOrchestratorStatus(phase string) string {

@@ -19,4 +19,6 @@ type Application struct {
 	ApplicationEnvVars []ApplicationEnvVar `json:"application_env_vars"`
 	Port               int32               `json:"port"`
 	ContainerPort      int32               `json:"container_port"`
+	PublicUrlEnabled   bool                `json:"public_url_enabled"`
+	PublicUrl          string              `json:"public_url"`
 }

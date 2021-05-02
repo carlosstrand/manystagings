@@ -1,4 +1,7 @@
 import { ModalProps } from '@material-ui/core/Modal';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox, { CheckboxProps } from '@material-ui/core/Checkbox';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useApplication from '../../hooks/useApplication';
@@ -29,6 +32,7 @@ const CreateEditApplicationModal = (props: CreateEditApplicationModalProps) => {
     docker_image_tag: '',
     port: '',
     container_port: '',
+    public_url_enabled: false,
   });
   const formToInput = (form): Application => ({
     environment_id: envId,
@@ -37,6 +41,7 @@ const CreateEditApplicationModal = (props: CreateEditApplicationModalProps) => {
     docker_image_tag: form.docker_image_tag,
     port: parseInt(form.port, 10),
     container_port: parseInt(form.container_port, 10),
+    public_url_enabled: form.public_url_enabled,
   })
   useEffect(() => {
     setForm(appQuery.data || {});
@@ -60,6 +65,9 @@ const CreateEditApplicationModal = (props: CreateEditApplicationModalProps) => {
     value: form[field],
     onChange: (e) => setForm(form => ({ ...form, [field]: e.target.value })),
   })
+  const handePublicURLChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, public_url_enabled: event.target.checked });
+  };
   return (
     <Modal
       open={open}
@@ -79,6 +87,18 @@ const CreateEditApplicationModal = (props: CreateEditApplicationModalProps) => {
         <Input label="Docker Image Tag" fullWidth {...getFormProps('docker_image_tag')} />
         <Input label="Port" fullWidth {...getFormProps('port')} />
         <Input label="Container Port" fullWidth {...getFormProps('container_port')} />
+        <FormGroup row>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={form.public_url_enabled}
+                onChange={handePublicURLChange}
+                color="primary"
+              />
+            }
+            label="Public URL"
+          />
+        </FormGroup>
       </div>
     </Modal>
   )
