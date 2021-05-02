@@ -50,13 +50,16 @@ func main() {
 	})
 
 	// Up
-	rootCmd.AddCommand(&cobra.Command{
+	var upRecreate bool
+	upCmd := &cobra.Command{
 		Use:   "up",
 		Short: "up all or an application for staging",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return a.Up(args)
+			return a.Up(args, upRecreate)
 		},
-	})
+	}
+	rootCmd.AddCommand(upCmd)
+	upCmd.Flags().BoolVarP(&upRecreate, "recreate", "r", false, "recreate app if already exists")
 
 	// Kill
 	rootCmd.AddCommand(&cobra.Command{

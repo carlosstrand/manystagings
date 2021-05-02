@@ -160,10 +160,7 @@ func (c *Client) GetEnvironmentApplications(ctx context.Context, envID string) (
 	return &appList, nil
 }
 
-func (c *Client) createEnvAppsEndpointRequest(ctx context.Context, envID string, apps []string, methodPath string) error {
-	reqMap := map[string]interface{}{
-		"apps": apps,
-	}
+func (c *Client) createEnvAppsEndpointRequest(ctx context.Context, envID string, apps []string, methodPath string, reqMap map[string]interface{}) error {
 	reqJson, err := json.Marshal(reqMap)
 	if err != nil {
 		return err
@@ -186,12 +183,19 @@ func (c *Client) createEnvAppsEndpointRequest(ctx context.Context, envID string,
 	return nil
 }
 
-func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
-	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/apply-deployment")
+func (c *Client) ApplyEnvironmentDeployment(ctx context.Context, envID string, apps []string, recreate bool) error {
+	reqMap := map[string]interface{}{
+		"apps":     apps,
+		"recreate": recreate,
+	}
+	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/apply-deployment", reqMap)
 }
 
 func (c *Client) DeleteEnvironmentDeployment(ctx context.Context, envID string, apps []string) error {
-	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/delete-deployment")
+	reqMap := map[string]interface{}{
+		"apps": apps,
+	}
+	return c.createEnvAppsEndpointRequest(ctx, envID, apps, "/delete-deployment", reqMap)
 }
 
 func (c *Client) GetEnvironmentStatus(ctx context.Context, envID string) ([]service.AppStatus, error) {

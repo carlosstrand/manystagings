@@ -170,12 +170,12 @@ func envMapToK8sEnvVar(envMap map[string]string) []apiv1.EnvVar {
 	return vars
 }
 
-func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {
+func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestrator.Deployment, recreate bool) error {
 	exists, err := k.checkDeploymentExists(ctx, deployment)
 	if err != nil {
 		return err
 	}
-	if exists {
+	if exists && recreate {
 		k.logger.Debugf("deployment '%s' already exists. Deleting current deployment...", deployment.Name)
 		err := k.DeleteDeployment(ctx, deployment)
 		if err != nil {
@@ -220,21 +220,26 @@ func (k *Kubernetes) CreateDeployment(ctx context.Context, deployment *orchestra
 			},
 		},
 	}
-	deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
-	_, err = deploymentsClient.Create(ctx, k8sDeployment, metav1.CreateOptions{})
-	if err != nil {
-		return err
+	if !exists || recreate {
+		deploymentsClient := k.clientset.AppsV1().Deployments(deployment.Namespace)
+		_, err = deploymentsClient.Create(ctx, k8sDeployment, metav1.CreateOptions{})
+		if err != nil {
+			return err
+		}
 	}
 	exists, err = k.checkServiceExists(ctx, deployment)
-	if exists {
-		k.logger.Debugf("Service '%s' already exists. Deleting current service...", deployment.Name)
+	if exists && recreate {
+		k.logger.Debugf("Service '%s' already exists and recreate is enabled. Deleting current service...", deployment.Name)
 		err := k.deleteService(ctx, deployment)
 		if err != nil {
 			return err
 		}
 	}
-	k.logger.Debugf("Creating service '%s'...", deployment.Name)
-	return k.createService(ctx, deployment)
+	if !exists || recreate {
+		k.logger.Debugf("Creating service '%s'...", deployment.Name)
+		return k.createService(ctx, deployment)
+	}
+	return nil
 }
 
 func (k *Kubernetes) DeleteDeployment(ctx context.Context, deployment *orchestrator.Deployment) error {

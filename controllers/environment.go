@@ -8,7 +8,8 @@ import (
 )
 
 type EnvironmentApplyDeploymentRequest struct {
-	Apps []string `json:"apps"`
+	Apps     []string `json:"apps"`
+	Recreate bool     `json:"recreate"`
 }
 
 type EnvironmentDeleteDeploymentRequest struct {
@@ -26,7 +27,7 @@ func (c *Controllers) EnvironmentApplyDeployment(ctx web.Context) error {
 	if err := c.linker.RepositoryDecoder("Environment").FindById(ctx, envID, &env); err != nil {
 		return renderError(ctx, err, 400)
 	}
-	if err := c.svc.EnvironmentApplyDeployment(ctx, env, req.Apps); err != nil {
+	if err := c.svc.EnvironmentApplyDeployment(ctx, env, req.Apps, req.Recreate); err != nil {
 		return renderError(ctx, err, 400)
 	}
 	return renderAccepted(ctx)

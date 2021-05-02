@@ -111,7 +111,7 @@ func (s *Service) getAppsFromEnvironmentAppNames(ctx context.Context, environmen
 	return apps, nil
 }
 
-func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment, appNames []string) error {
+func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *models.Environment, appNames []string, recreate bool) error {
 	apps, err := s.getAppsFromEnvironmentAppNames(ctx, environment, appNames)
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (s *Service) EnvironmentApplyDeployment(ctx context.Context, environment *m
 			ContainerPort: app.ContainerPort,
 			Namespace:     environment.Namespace,
 			Env:           appEnvVarsToMap(app.ApplicationEnvVars),
-		})
+		}, recreate)
 	}
 	return nil
 }

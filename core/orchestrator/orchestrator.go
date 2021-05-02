@@ -77,7 +77,7 @@ type Orchestrator interface {
 	CreateNamespace(ctx context.Context, namespace string) error
 
 	// Create a deployment
-	CreateDeployment(ctx context.Context, deployment *Deployment) error
+	CreateDeployment(ctx context.Context, deployment *Deployment, recreate bool) error
 
 	// Delete a deployment
 	DeleteDeployment(ctx context.Context, deployment *Deployment) error
