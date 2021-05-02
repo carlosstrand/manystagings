@@ -4,19 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/carlosstrand/manystagings/cli/manystagings/actions"
-	"github.com/carlosstrand/manystagings/cli/manystagings/client"
-	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli"
-	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli/providerscli/kubernetescli"
-	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
+	"github.com/carlosstrand/manystagings/cli/ms/actions"
+	"github.com/carlosstrand/manystagings/cli/ms/client"
+	"github.com/carlosstrand/manystagings/cli/ms/orchestratorcli"
+	"github.com/carlosstrand/manystagings/cli/ms/orchestratorcli/providerscli/kubernetescli"
+	"github.com/carlosstrand/manystagings/cli/ms/utils/msconfig"
 	"github.com/spf13/cobra"
 )
 
 func main() {
 	config, err := msconfig.LoadConfig()
 	if err != nil {
-		fmt.Println("Could not load config. Please run:\n\n\t manystagings configure")
+		fmt.Println("Could not load config. Please run:\n\n\t ms configure")
 		os.Exit(1)
 	}
 	var orchestratorCLI orchestratorcli.OrchestratorCLI
@@ -35,8 +36,8 @@ func main() {
 	})
 
 	var rootCmd = &cobra.Command{
-		Use:   "manystagings",
-		Short: "Setup your staging environment easily with manystagings",
+		Use:   "ms",
+		Short: "Setup your staging environment easily with ms",
 		Long:  `A Fast and Flexible staging manager built in Go.`,
 	}
 
@@ -92,13 +93,13 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:     "exec",
 		Short:   "execute a command into an application container",
-		Example: "manystagings exec [APP_NAME] -- [COMMAND]",
+		Example: "ms exec [APP_NAME] -- [COMMAND]",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("application name required")
 			}
 			if cmd.ArgsLenAtDash() <= 0 {
-				return errors.New("missing exec command. Please run:\nmanystagings exec [APP_NAME] -- [COMMAND]")
+				return errors.New("missing exec command. Please run:\nms exec [APP_NAME] -- [COMMAND]")
 			}
 			return nil
 		},
@@ -109,12 +110,49 @@ func main() {
 		},
 	})
 
+	// Logs
+	var logsFollow bool
+	var logsTimestamps bool
+	var logsLimitBytes int64
+	var logsTail int64
+	var logsSinceTime string
+	var logsSinceSeconds time.Duration
+	logsCmd := &cobra.Command{
+		Use:     "logs",
+		Aliases: []string{"l"},
+		Short:   "Print the logs for an appliation",
+		Example: "ms logs",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("application name required")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return a.LogsDeployment(args[0], orchestratorcli.LogsOptions{
+				Follow:       logsFollow,
+				Timestamps:   logsTimestamps,
+				LimitBytes:   logsLimitBytes,
+				Tail:         logsTail,
+				SinceTime:    logsSinceTime,
+				SinceSeconds: logsSinceSeconds,
+			})
+		},
+	}
+	rootCmd.AddCommand(logsCmd)
+	logsCmd.Flags().BoolVarP(&logsFollow, "follow", "f", false, "Specify if the logs should be streamed.")
+	logsCmd.Flags().BoolVar(&logsTimestamps, "timestamps", false, "Include timestamps on each line in the log output")
+	logsCmd.Flags().Int64Var(&logsLimitBytes, "limit-bytes", 0, "Maximum bytes of logs to return. Defaults to no limit.")
+	logsCmd.Flags().Int64Var(&logsTail, "tail", 10, "Lines of recent log file to display. Defaults to -1 with no selector, showing all log lines otherwise 10, if a selector is provided.")
+	logsCmd.Flags().StringVar(&logsSinceTime, "since-time", "", "Only return logs after a specific date (RFC3339). Defaults to all logs. Only one of since-time / since may be used.")
+	logsCmd.Flags().DurationVar(&logsSinceSeconds, "since", 0, "Only return logs newer than a relative duration like 5s, 2m, or 3h. Defaults to all logs. Only one of since-time / since may be used.")
+
 	// Status
 	rootCmd.AddCommand(&cobra.Command{
 		Use:     "status",
 		Aliases: []string{"ps"},
 		Short:   "get application statuses inside your staging",
-		Example: "manystagings status",
+		Example: "ms status",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return a.Status()
 		},

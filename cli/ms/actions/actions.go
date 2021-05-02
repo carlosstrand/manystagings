@@ -3,9 +3,9 @@ package actions
 import (
 	"errors"
 
-	"github.com/carlosstrand/manystagings/cli/manystagings/client"
-	"github.com/carlosstrand/manystagings/cli/manystagings/orchestratorcli"
-	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
+	"github.com/carlosstrand/manystagings/cli/ms/client"
+	"github.com/carlosstrand/manystagings/cli/ms/orchestratorcli"
+	"github.com/carlosstrand/manystagings/cli/ms/utils/msconfig"
 )
 
 var ErrAppNotFound = errors.New("app not found")

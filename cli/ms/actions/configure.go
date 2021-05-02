@@ -6,8 +6,8 @@ import (
 
 	"context"
 
-	"github.com/carlosstrand/manystagings/cli/manystagings/client"
-	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
+	"github.com/carlosstrand/manystagings/cli/ms/client"
+	"github.com/carlosstrand/manystagings/cli/ms/utils/msconfig"
 	"github.com/carlosstrand/manystagings/models"
 	"github.com/manifoldco/promptui"
 )

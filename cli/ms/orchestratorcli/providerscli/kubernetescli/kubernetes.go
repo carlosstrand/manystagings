@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 
-	"github.com/carlosstrand/manystagings/cli/manystagings/utils/msconfig"
+	"github.com/carlosstrand/manystagings/cli/ms/utils/msconfig"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
