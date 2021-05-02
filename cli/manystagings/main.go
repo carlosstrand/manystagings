@@ -71,7 +71,8 @@ func main() {
 	})
 
 	// Proxy
-	rootCmd.AddCommand(&cobra.Command{
+	var proxyPort int32
+	proxyCmd := &cobra.Command{
 		Use:   "proxy",
 		Short: "proxy to an application inside your staging",
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -81,9 +82,11 @@ func main() {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return a.ProxyDeployment(args[0])
+			return a.ProxyDeployment(args[0], proxyPort)
 		},
-	})
+	}
+	rootCmd.AddCommand(proxyCmd)
+	proxyCmd.Flags().Int32VarP(&proxyPort, "port", "p", -1, "Listen on specified port")
 
 	// Exec
 	rootCmd.AddCommand(&cobra.Command{
