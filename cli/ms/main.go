@@ -38,7 +38,7 @@ func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "ms",
 		Short: "Setup your staging environment easily with ms",
-		Long:  `A Fast and Flexible staging manager built in Go.`,
+		Long:  `ManyStagings is fast, lightweight and easy staging environment manager`,
 	}
 
 	// Configure
