@@ -1,6 +1,8 @@
 # ManyStagings
 
-ManyStagings is fast, lightweight and easy staging environment manager with a great focus on the Developer Experience. Orchestrators like Kubernetes, are extremely powerful for production applications. But when we use it as development environment, it becomes very complex and verbose to manage applications and services. ManyStagings aims to integrate and abstract all the complexity of Kubernetes by bringing a friendly Web UI and a CLI that becomes the developer's best friend.
+ManyStagings is fast, lightweight and easy staging environment manager with a great focus on the Developer Experience.
+Orchestrators like Kubernetes, are extremely powerful for production applications. But when we use it as development environment, it becomes very complex and verbose to manage applications and services.
+ManyStagings aims to integrate and abstract all the complexity of Kubernetes by bringing a friendly Web UI and a CLI that becomes the developer's best friend.
 
 ![image](https://gblobscdn.gitbook.com/assets%2F-MYc4vBTATLslDGIBVhf%2F-MZjU9twlH1fjuxVibVq%2F-MZjXc_LQUyAUpQJPBJo%2Fimage.png?alt=media&token=0534786e-94d4-47aa-9395-86b77315e865)
 
@@ -14,7 +16,7 @@ Docker-compose solves this problem in parts, but it can still consume a lot of m
 
 With ManyStaging the only thing we need to do is configure the CLI and run:
 
-```text
+```
 $ ms up
 
 $ ms status
