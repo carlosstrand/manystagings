@@ -5,13 +5,14 @@ Orchestrators like Kubernetes, are extremely powerful for production application
 
 ManyStagings aims to integrate and abstract all the complexity of Kubernetes by bringing a friendly Web UI and a CLI that becomes the developer's best friend.
 
-![image](https://gblobscdn.gitbook.com/assets%2F-MYc4vBTATLslDGIBVhf%2F-MZpEOKRn7aqHi13lTua%2F-MZpEk9SG9eDno9bEm4n%2Fmanystagings-architeture.png?alt=media&token=bde9d290-81b9-48c7-81ba-0e51bb24d48d)
+![manystagings-archtecture-padding](https://user-images.githubusercontent.com/6170412/116957360-14c88e00-ac6e-11eb-8396-944121dd8716.png)
+
 
 ## What problem does ManyStaging solve?
 
 Let's imagine a scenario in which a Frontend developer needs to build an entire backend environment in order to develop a web or mobile application. He will have to worry about configuring API, Database and how the applications connect to each other. In addition, the QA process where we have only a single staging environment can become a bottleneck.
 
-![image](https://user-images.githubusercontent.com/6170412/116957127-763c2d00-ac6d-11eb-94ab-66a6142d7166.png)
+![manystagings-bottleneck-padding](https://user-images.githubusercontent.com/6170412/116957365-1a25d880-ac6e-11eb-85c8-be786e0f3cff.png)
 
 ## Why not just use docker-compose, for example?
 
